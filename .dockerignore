@@ -1,0 +1,12 @@
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+.next
+.git
+.gitignore
+.env*.local
+.vercel
+.claude
+# Don't ignore public directory - it contains generated icons
+# Don't ignore README.md - might be needed for documentation
