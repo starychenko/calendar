@@ -6,7 +6,6 @@ import {
   eachWeekOfInterval,
   format,
   isSameMonth,
-  isSameDay,
   getDay,
 } from "date-fns";
 import { uk } from "date-fns/locale";
@@ -63,7 +62,6 @@ export function getGfkMonthWeeks(year: number, month: number): CalendarWeek[] {
       const date = addDays(weekStart, d);
       const dayOfWeek = getDay(date);
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      const today = new Date();
 
       days.push({
         date,
@@ -74,7 +72,6 @@ export function getGfkMonthWeeks(year: number, month: number): CalendarWeek[] {
         isoWeekYear: year,
         isWeekend,
         isCurrentMonth: isSameMonth(date, monthDate),
-        isToday: isSameDay(date, today),
         isHoliday: false,
         holidayName: undefined,
       });

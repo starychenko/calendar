@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useMemo } from "react";
+import { isSameDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarDay } from "@/lib/calendar";
 import { getHolidayForDate } from "@/lib/holidays";
@@ -18,6 +19,9 @@ interface DayCellProps {
 }
 
 const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
+  // Client-side check for current day (avoids build-time static value)
+  const isToday = useMemo(() => isSameDay(day.date, new Date()), [day.date]);
+
   // Memoize expensive holiday lookup
   const holiday = useMemo(() => getHolidayForDate(day.date), [day.date]);
   const isHoliday = !!holiday;
@@ -38,7 +42,7 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
     const baseStyles = "relative aspect-square flex flex-col items-center justify-center border-r last:border-r-0 border-slate-200/40 dark:border-slate-700/40 transition-[shadow,filter] duration-200";
     const borderBottom = !isLast ? "border-b" : "";
 
-    if (day.isToday) {
+    if (isToday) {
       return cn(
         baseStyles,
         borderBottom,
@@ -59,7 +63,7 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
     }
 
     return cn(baseStyles, borderBottom, "hover:bg-slate-50/60 dark:hover:bg-slate-800/30");
-  }, [day.isToday, isHoliday, holidayStyles, day.isWeekend, isLast]);
+  }, [isToday, isHoliday, holidayStyles, day.isWeekend, isLast]);
 
   // Показуємо "фантомні" дні з інших місяців
   if (!day.isCurrentMonth) {
@@ -85,7 +89,7 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
   const monthName = day.date.toLocaleDateString('uk', { month: 'long' });
   const ariaLabel = isHoliday
     ? `${day.day} ${monthName}, ${holiday.name}`
-    : `${day.day} ${monthName}${day.isToday ? ', сьогодні' : ''}`;
+    : `${day.day} ${monthName}${isToday ? ', сьогодні' : ''}`;
 
   const cellContent = (
     <div
@@ -97,12 +101,12 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
       <span
         className={cn(
           "text-[10px] sm:text-xs font-semibold transition-colors",
-          isHoliday && !day.isToday && "font-bold"
+          isHoliday && !isToday && "font-bold"
         )}
       >
         {day.day}
       </span>
-      {isHoliday && !day.isToday && holidayIndicator}
+      {isHoliday && !isToday && holidayIndicator}
     </div>
   );
 

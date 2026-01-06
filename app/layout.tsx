@@ -15,6 +15,10 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+// ISR: Revalidate once a month for SEO metadata with current year
+// Calendar dates (isToday, isCurrentMonth) are handled on client side
+export const revalidate = 2592000; // 30 days in seconds
+
 // Генеруємо поточний рік для SEO
 const currentYear = new Date().getFullYear();
 

@@ -11,6 +11,9 @@ export const contentType = "image/png";
 // Runtime configuration
 export const runtime = "edge";
 
+// ISR: Revalidate once a month for SEO
+export const revalidate = 2592000; // 30 days in seconds
+
 // Image generation
 export default async function Image() {
   const currentYear = new Date().getFullYear();

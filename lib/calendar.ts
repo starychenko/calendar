@@ -9,7 +9,6 @@ import {
   format,
   getDay,
   isSameMonth,
-  isSameDay,
   startOfMonth,
   endOfMonth,
   eachMonthOfInterval,
@@ -25,7 +24,6 @@ export interface CalendarDay {
   isoWeekYear: number;
   isWeekend: boolean;
   isCurrentMonth: boolean;
-  isToday: boolean;
   isHoliday: boolean;
   holidayName?: string;
 }
@@ -101,7 +99,6 @@ export function createCalendarDay(
 ): CalendarDay {
   const dayOfWeek = getDay(date);
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-  const today = new Date();
 
   return {
     date,
@@ -112,7 +109,6 @@ export function createCalendarDay(
     isoWeekYear: getISOWeekYear(date),
     isWeekend,
     isCurrentMonth: isSameMonth(date, currentMonth),
-    isToday: isSameDay(date, today),
     isHoliday: false,
     holidayName: undefined,
   };
