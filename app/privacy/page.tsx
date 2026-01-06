@@ -5,6 +5,9 @@ import { SITE_URL } from "@/lib/env";
 
 const currentYear = new Date().getFullYear();
 
+// ISR: Revalidate once a month for SEO metadata
+export const revalidate = 2592000; // 30 days in seconds
+
 export const metadata: Metadata = {
   title: `Політика конфіденційності | Фіскальний календар України ${currentYear}`,
   description:

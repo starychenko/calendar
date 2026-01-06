@@ -1,6 +1,11 @@
 import { YearCalendar } from "@/components/calendar/year-calendar";
 import { SEOContent } from "@/components/seo-content";
 
+// Static page - dates are determined on client side
+// isToday: client-side in DayCell
+// isCurrentMonth: client-side in MonthCalendar
+// currentYear: client-side in YearCalendar, Footer, SEOContent
+
 export default function Home() {
   return (
     <div className="bg-linear-to-b from-background to-muted/20">
