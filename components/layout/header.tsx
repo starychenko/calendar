@@ -25,28 +25,25 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto px-8 sm:px-10 md:px-12 lg:px-16 xl:px-12 2xl:px-10 3xl:px-96 max-w-screen-3xl">
-        <div
-          className={cn(
-            "grid grid-cols-[1fr_auto_1fr] items-center transition-all duration-300",
-            isHomePage && navigationVisible ? "h-20" : "h-16"
-          )}
-        >
+        {/* Фіксована висота h-16 (64px) на всіх пристроях */}
+        <div className="relative grid grid-cols-[1fr_auto_1fr] items-center h-16">
           {/* Logo and Title - колонка 1 (ліворуч) */}
-          <div className="col-start-1 justify-self-start">
+          <div className="col-start-1 justify-self-start z-10">
             <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
               <Calendar className="h-6 w-6 text-primary" />
               <h1 className="font-bold text-lg whitespace-nowrap">Фіскальний календар</h1>
             </Link>
           </div>
 
-          {/* Year Navigation - колонка 2 (центр) - тільки на головній сторінці */}
+          {/* Year Navigation - абсолютне позиціювання в центрі */}
           {isHomePage && (
             <div
               className={cn(
-                "col-start-2 justify-self-center hidden lg:block transition-all duration-300",
+                "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+                "hidden lg:block transition-opacity duration-300 z-0",
                 navigationVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 -translate-y-2 pointer-events-none"
+                  ? "opacity-100 pointer-events-auto"
+                  : "opacity-0 pointer-events-none"
               )}
             >
               <YearNavigationControls
@@ -62,7 +59,7 @@ export function Header() {
           )}
 
           {/* Theme Toggle - колонка 3 (праворуч) */}
-          <div className="col-start-3 justify-self-end">
+          <div className="col-start-3 justify-self-end z-10">
             <ThemeToggle />
           </div>
         </div>
