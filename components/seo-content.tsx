@@ -17,7 +17,7 @@ export function SEOContent() {
         <h2 className="text-2xl font-bold mb-4">
           Державні та професійні свята в {currentYear} році
         </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
             <div className="w-3 h-3 rounded-full bg-blue-500 mt-1.5 shrink-0" />
             <div>
@@ -29,14 +29,14 @@ export function SEOContent() {
             <div className="w-3 h-3 rounded-full bg-purple-500 mt-1.5 shrink-0" />
             <div>
               <div className="font-medium text-sm">Релігійні</div>
-              <div className="text-xs text-muted-foreground">Великдень, Трійця, Різдво</div>
+              <div className="text-xs text-muted-foreground">Великдень, Трійця, Івана Купала, Спас</div>
             </div>
           </div>
           <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
             <div className="w-3 h-3 rounded-full bg-pink-500 mt-1.5 shrink-0" />
             <div>
               <div className="font-medium text-sm">Міжнародні</div>
-              <div className="text-xs text-muted-foreground">День жінок, День матері</div>
+              <div className="text-xs text-muted-foreground">День жінок, День Валентина</div>
             </div>
           </div>
           <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
@@ -44,6 +44,13 @@ export function SEOContent() {
             <div>
               <div className="font-medium text-sm">Комерційні</div>
               <div className="text-xs text-muted-foreground">Чорна п'ятниця, Cyber Monday</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
+            <div className="w-3 h-3 rounded-full bg-slate-400 mt-1.5 shrink-0" />
+            <div>
+              <div className="font-medium text-sm">Великий піст</div>
+              <div className="text-xs text-muted-foreground">48-денний період підготовки до Великодня</div>
             </div>
           </div>
         </div>
@@ -82,10 +89,11 @@ export function SEOContent() {
               Які свята включені в календар?
             </AccordionTrigger>
             <AccordionContent>
-              Календар включає всі офіційні державні свята України (День Незалежності, Новий рік),
-              релігійні свята (Великдень, Трійця, Різдво), міжнародні свята (8 Березня, День матері)
-              та комерційні події (Чорна п'ятниця, Cyber Monday). Кожен тип свята позначений своїм
-              кольором для зручності планування.
+              Календар включає всі офіційні державні свята України, повний православний календар
+              (31+ свято, включаючи дванадесяті свята, Великдень, Трійцю, Івана Купала, Спас та
+              інші), міжнародні свята та комерційні події. Великий піст позначається окремо як
+              48-денний період. Всього понад 70 важливих дат для планування протягом року. Кожен
+              тип свята позначений своїм кольором для зручності планування.
             </AccordionContent>
           </AccordionItem>
 
@@ -110,6 +118,42 @@ export function SEOContent() {
               Так, календар автоматично розраховує всі дати та свята для поточного року. Рухомі свята
               (як Великдень, Трійця) обчислюються динамічно за відповідними алгоритмами. Це гарантує,
               що ви завжди маєте актуальну інформацію незалежно від року.
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="item-6">
+            <AccordionTrigger>
+              Які православні свята включені в календар?
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2 text-sm">
+                <p>Календар включає повний православний календар України:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>
+                    <strong>Дванадесяті свята:</strong> Богоявлення, Стрітення, Благовіщення,
+                    Вознесіння, Трійця, Преображення (Яблучний Спас), Успіння, Різдво Богородиці,
+                    Воздвиження, Введення в храм
+                  </li>
+                  <li>
+                    <strong>Великі свята:</strong> Великдень (Пасха), Різдво Христове
+                  </li>
+                  <li>
+                    <strong>Дні пам'яті святих:</strong> Святого Юрія, Апостолів Петра і Павла,
+                    Святого Миколая
+                  </li>
+                  <li>
+                    <strong>Народні релігійні свята:</strong> Івана Купала, Щедрий вечір (Маланки)
+                  </li>
+                  <li>
+                    <strong>Рухомі свята:</strong> Прощена неділя, Вербна неділя, Великдень,
+                    Вознесіння, Трійця (розраховуються автоматично за церковним календарем)
+                  </li>
+                  <li>
+                    <strong>Великий піст:</strong> 48-денний період перед Великоднем позначений
+                    окремо
+                  </li>
+                </ul>
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
