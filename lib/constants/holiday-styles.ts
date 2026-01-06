@@ -12,6 +12,8 @@ export const HOLIDAY_STYLES: Record<Holiday["type"], string> = {
     "bg-linear-to-br from-pink-50 to-pink-100/80 dark:from-pink-950/40 dark:to-pink-900/50 text-pink-900 dark:text-pink-100 border-pink-200/30 dark:border-pink-800/30",
   commercial:
     "bg-linear-to-br from-amber-50 to-amber-100/80 dark:from-amber-950/40 dark:to-amber-900/50 text-amber-900 dark:text-amber-100 border-amber-200/30 dark:border-amber-800/30",
+  lent:
+    "bg-linear-to-br from-slate-50/40 to-slate-100/60 dark:from-slate-950/20 dark:to-slate-900/30 text-slate-700 dark:text-slate-300 border-slate-200/20 dark:border-slate-800/20",
 };
 
 /**
@@ -26,4 +28,6 @@ export const HOLIDAY_INDICATORS: Record<Holiday["type"], string> = {
     "absolute bottom-1 left-1/2 -translate-x-1/2 w-2 h-0.5 sm:w-2.5 sm:h-0.5 bg-pink-600 dark:bg-pink-400 shadow-sm shadow-pink-600/50 dark:shadow-pink-400/50",
   commercial:
     "absolute bottom-1 left-1/2 -translate-x-1/2 w-2 h-0.5 sm:w-2.5 sm:h-0.5 bg-amber-600 dark:bg-amber-400 shadow-sm shadow-amber-600/50 dark:shadow-amber-400/50",
+  lent:
+    "absolute bottom-1 left-1/2 -translate-x-1/2 w-2 h-0.5 sm:w-2.5 sm:h-0.5 bg-slate-400 dark:bg-slate-500 shadow-sm shadow-slate-400/30 dark:shadow-slate-500/30",
 };
