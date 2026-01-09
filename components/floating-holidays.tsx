@@ -45,6 +45,7 @@ const useHolidaysPanelStore = create<HolidaysPanelStore>()(
 
 /**
  * Debounce функція для оптимізації resize обробника
+ * Винесена поза компонентом для уникнення ре-креації
  */
 function debounce<T extends (...args: any[]) => any>(
   func: T,
@@ -83,12 +84,14 @@ export function FloatingHolidays() {
     return () => clearInterval(interval);
   }, [currentDateKey]);
 
-  // Дебаунс для resize обробника
-  const debouncedCheckMobile = useRef(
-    debounce(() => {
-      setIsMobile(window.innerWidth < 1024);
-    }, 150)
-  ).current;
+  // Мемоізована debounce функція для resize обробника
+  const debouncedCheckMobile = useMemo(
+    () =>
+      debounce(() => {
+        setIsMobile(window.innerWidth < 1024);
+      }, 150),
+    []
+  );
 
   // Визначаємо мобільний пристрій з debounce
   useEffect(() => {
@@ -97,7 +100,11 @@ export function FloatingHolidays() {
     };
     checkMobile();
     window.addEventListener("resize", debouncedCheckMobile);
-    return () => window.removeEventListener("resize", debouncedCheckMobile);
+
+    // Cleanup: видаляємо listener при unmount
+    return () => {
+      window.removeEventListener("resize", debouncedCheckMobile);
+    };
   }, [debouncedCheckMobile]);
 
   // Показуємо підказку при першому візиті (тільки на десктопах коли панель закрита)

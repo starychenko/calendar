@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
+import { EASTER_YEAR_MIN, EASTER_YEAR_MAX } from "@/lib/holidays";
 
 interface YearNavigationControlsProps {
   year: number;
@@ -43,7 +44,8 @@ export function YearNavigationControls({
           className={cn(
             compact ? "h-7 w-7" : "h-8 w-8 sm:h-9 sm:w-9"
           )}
-          aria-label="Попередній рік"
+          disabled={year <= EASTER_YEAR_MIN}
+          aria-label={year <= EASTER_YEAR_MIN ? `Попередній рік (мінімальний рік: ${EASTER_YEAR_MIN})` : "Попередній рік"}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -65,7 +67,8 @@ export function YearNavigationControls({
           className={cn(
             compact ? "h-7 w-7" : "h-8 w-8 sm:h-9 sm:w-9"
           )}
-          aria-label="Наступний рік"
+          disabled={year >= EASTER_YEAR_MAX}
+          aria-label={year >= EASTER_YEAR_MAX ? `Наступний рік (максимальний рік: ${EASTER_YEAR_MAX})` : "Наступний рік"}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
