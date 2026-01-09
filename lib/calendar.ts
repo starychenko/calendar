@@ -89,7 +89,13 @@ export function getMonthWeeks(year: number, month: number): CalendarWeek[] {
     });
   });
 
-  return weeks.sort((a, b) => a.weekNumber - b.weekNumber);
+  // Сортуємо тижні за датою першого дня, а не за номером тижня
+  // Це виправляє проблему з 53 тижнем у січні, який має бути першим
+  return weeks.sort((a, b) => {
+    const dateA = a.days[0].date.getTime();
+    const dateB = b.days[0].date.getTime();
+    return dateA - dateB;
+  });
 }
 
 // Створити об'єкт CalendarDay
