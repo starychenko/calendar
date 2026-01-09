@@ -4,7 +4,7 @@ import { memo, useMemo } from "react";
 import { isSameDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarDay } from "@/lib/calendar";
-import { getHolidayForDate } from "@/lib/holidays";
+import { getHolidaysForDate } from "@/lib/holidays";
 import { HOLIDAY_STYLES, HOLIDAY_INDICATORS } from "@/lib/constants/holiday-styles";
 import {
   Tooltip,
@@ -22,25 +22,43 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
   // Client-side check for current day (avoids build-time static value)
   const isToday = useMemo(() => isSameDay(day.date, new Date()), [day.date]);
 
-  // Memoize expensive holiday lookup
-  const holiday = useMemo(() => getHolidayForDate(day.date), [day.date]);
-  const isHoliday = !!holiday;
+  // Memoize expensive holiday lookup - returns array of all holidays
+  const holidays = useMemo(() => getHolidaysForDate(day.date), [day.date]);
+  const isHoliday = holidays.length > 0;
 
-  // Memoize holiday styles from constants
+  // First holiday has highest priority (used for styling and indicator)
+  const primaryHoliday = holidays[0];
+
+  // Memoize holiday styles from constants (based on primary holiday)
   const holidayStyles = useMemo(() => {
-    return holiday ? HOLIDAY_STYLES[holiday.type] : "";
-  }, [holiday]);
+    return primaryHoliday ? HOLIDAY_STYLES[primaryHoliday.type] : "";
+  }, [primaryHoliday]);
 
-  // Memoize holiday indicator JSX
+  // Memoize holiday indicator JSX (based on primary holiday)
   const holidayIndicator = useMemo(() => {
-    if (!holiday) return null;
-    return <div className={HOLIDAY_INDICATORS[holiday.type]} />;
-  }, [holiday]);
+    if (!primaryHoliday) return null;
+    return <div className={HOLIDAY_INDICATORS[primaryHoliday.type]} />;
+  }, [primaryHoliday]);
 
   // Memoize cell styles to avoid Tailwind IntelliSense conflicts
   const cellStyles = useMemo(() => {
     const baseStyles = "relative aspect-square flex flex-col items-center justify-center border-r last:border-r-0 border-slate-200/40 dark:border-slate-700/40 transition-[shadow,filter] duration-200";
     const borderBottom = !isLast ? "border-b" : "";
+
+    // Пріоритет стилів: свято + поточна дата > тільки свято > тільки поточна дата > вихідний > звичайний
+    if (isHoliday && isToday) {
+      // Комбінуємо стилі свята з рамкою поточної дати
+      return cn(
+        baseStyles,
+        borderBottom,
+        holidayStyles,
+        "ring-2 ring-inset ring-slate-500 dark:ring-slate-400 font-bold shadow-sm shadow-slate-400/20 dark:shadow-slate-600/30 hover:brightness-95 dark:hover:brightness-110"
+      );
+    }
+
+    if (isHoliday) {
+      return cn(baseStyles, borderBottom, holidayStyles, "hover:brightness-95 dark:hover:brightness-110");
+    }
 
     if (isToday) {
       return cn(
@@ -48,10 +66,6 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
         borderBottom,
         "ring-2 ring-inset ring-slate-500 dark:ring-slate-400 bg-linear-to-br from-slate-100 to-slate-50 dark:from-slate-800/70 dark:to-slate-900/50 font-bold shadow-sm shadow-slate-400/20 dark:shadow-slate-600/30"
       );
-    }
-
-    if (isHoliday) {
-      return cn(baseStyles, borderBottom, holidayStyles, "hover:brightness-95 dark:hover:brightness-110");
     }
 
     if (day.isWeekend) {
@@ -88,7 +102,7 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
 
   const monthName = day.date.toLocaleDateString('uk', { month: 'long' });
   const ariaLabel = isHoliday
-    ? `${day.day} ${monthName}, ${holiday.name}`
+    ? `${day.day} ${monthName}, ${holidays.map(h => h.name).join(', ')}`
     : `${day.day} ${monthName}${isToday ? ', сьогодні' : ''}`;
 
   const cellContent = (
@@ -101,12 +115,12 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
       <span
         className={cn(
           "text-[10px] sm:text-xs font-semibold transition-colors",
-          isHoliday && !isToday && "font-bold"
+          isHoliday && "font-bold"
         )}
       >
         {day.day}
       </span>
-      {isHoliday && !isToday && holidayIndicator}
+      {isHoliday && holidayIndicator}
     </div>
   );
 
@@ -119,9 +133,17 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
         <TooltipContent
           side="top"
           sideOffset={4}
-          className="px-2 py-1 text-xs max-w-[calc(100vw-2rem)] sm:max-w-50"
+          className="px-2.5 py-1.5 text-xs max-w-[calc(100vw-2rem)] sm:max-w-xs"
         >
-          <p className="truncate">{holiday.name}</p>
+          {holidays.length === 1 ? (
+            <p>{holidays[0].name}</p>
+          ) : (
+            <ul className="space-y-0.5 list-none">
+              {holidays.map((holiday, index) => (
+                <li key={index}>{holiday.name}</li>
+              ))}
+            </ul>
+          )}
         </TooltipContent>
       </Tooltip>
     );

@@ -241,15 +241,15 @@ export function getHolidaysForYear(year: number): Holiday[] {
   return holidays;
 }
 
-// Перевірити, чи є дата святом (з системою пріоритетів)
-export function getHolidayForDate(date: Date): Holiday | undefined {
+// Отримати всі свята для конкретної дати (відсортовані за пріоритетом)
+export function getHolidaysForDate(date: Date): Holiday[] {
   const year = getYear(date);
   const holidays = getHolidaysForYear(year);
 
   const matchingHolidays = holidays.filter((holiday) => isSameDay(holiday.date, date));
 
-  if (matchingHolidays.length === 0) return undefined;
-  if (matchingHolidays.length === 1) return matchingHolidays[0];
+  if (matchingHolidays.length === 0) return [];
+  if (matchingHolidays.length === 1) return matchingHolidays;
 
   // Система пріоритетів: national > religious > international > commercial > lent
   const priorityOrder: Holiday["type"][] = [
@@ -262,5 +262,12 @@ export function getHolidayForDate(date: Date): Holiday | undefined {
 
   return matchingHolidays.sort(
     (a, b) => priorityOrder.indexOf(a.type) - priorityOrder.indexOf(b.type)
-  )[0];
+  );
+}
+
+// Перевірити, чи є дата святом (повертає свято з найвищим пріоритетом)
+// Deprecated: використовуйте getHolidaysForDate для повного списку свят
+export function getHolidayForDate(date: Date): Holiday | undefined {
+  const holidays = getHolidaysForDate(date);
+  return holidays.length > 0 ? holidays[0] : undefined;
 }
