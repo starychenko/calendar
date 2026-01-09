@@ -1,5 +1,6 @@
 import { YearCalendar } from "@/components/calendar/year-calendar";
 import { SEOContent } from "@/components/seo-content";
+import { FloatingHolidays } from "@/components/floating-holidays";
 
 // Static page - dates are determined on client side
 // isToday: client-side in DayCell
@@ -13,6 +14,7 @@ export default function Home() {
         <YearCalendar />
         <SEOContent />
       </div>
+      <FloatingHolidays />
     </div>
   );
 }
