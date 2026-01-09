@@ -100,13 +100,6 @@ export function FloatingHolidays() {
     return () => window.removeEventListener("resize", debouncedCheckMobile);
   }, [debouncedCheckMobile]);
 
-  // На мобільних завжди закрито за замовчуванням
-  useEffect(() => {
-    if (isMobile && isOpen) {
-      setIsOpen(false);
-    }
-  }, [isMobile, isOpen, setIsOpen]);
-
   // Показуємо підказку при першому візиті (тільки на десктопах коли панель закрита)
   useEffect(() => {
     // Перевіряємо, чи вже показували підказку
