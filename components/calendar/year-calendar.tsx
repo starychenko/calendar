@@ -36,15 +36,10 @@ export function YearCalendar() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         // Показуємо в header коли navigation НЕ видимий у viewport
-        // або коли його верхній край вище header
-        const isAboveViewport = entry.boundingClientRect.top < 0;
-        const isNotVisible = !entry.isIntersecting;
-        const shouldShowInHeader = isNotVisible || isAboveViewport;
-
-        setNavigationVisible(shouldShowInHeader);
+        setNavigationVisible(!entry.isIntersecting);
       },
       {
-        threshold: [0, 0.1, 1], // Відстежуємо входження/виходження з viewport
+        threshold: 0, // Одне значення достатньо - коли елемент заходить/виходить
         rootMargin: "-64px 0px 0px 0px", // Компенсуємо висоту header
       }
     );

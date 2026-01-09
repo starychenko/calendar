@@ -42,6 +42,8 @@ if (typeof window !== "undefined") {
   const oldKey = "fiscal-calendar-storage";
   if (localStorage.getItem(oldKey)) {
     localStorage.removeItem(oldKey);
-    console.log("Видалено застарілий localStorage ключ:", oldKey);
+    if (process.env.NODE_ENV === "development") {
+      console.log("Видалено застарілий localStorage ключ:", oldKey);
+    }
   }
 }

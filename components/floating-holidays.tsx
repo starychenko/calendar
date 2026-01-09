@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { Calendar, ChevronRight, ChevronLeft, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -47,7 +47,7 @@ const useHolidaysPanelStore = create<HolidaysPanelStore>()(
  * Debounce функція для оптимізації resize обробника
  * Винесена поза компонентом для уникнення ре-креації
  */
-function debounce<T extends (...args: any[]) => any>(
+function debounce<T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -348,7 +348,7 @@ interface HolidayCardProps {
   isToday?: boolean;
 }
 
-const HolidayCard = React.memo(function HolidayCard({
+const HolidayCard = memo(function HolidayCard({
   holiday,
   isToday,
 }: HolidayCardProps) {
