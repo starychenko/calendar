@@ -25,16 +25,10 @@ const GFK_MONTH_WEEKS: readonly number[] = [
 
 // Отримати початок GfK року (перший понеділок року або останній понеділок попереднього року)
 function getGfkYearStart(year: number): Date {
-  const yearStart = startOfYear(new Date(year, 0, 1));
-  const firstMonday = startOfWeek(yearStart, { weekStartsOn: 1 });
-
-  // Якщо перший понеділок занадто далеко від початку року (більше 3 днів),
-  // беремо понеділок попереднього тижня
-  if (firstMonday > yearStart && firstMonday.getDate() > 4) {
-    return addDays(firstMonday, -7);
-  }
-
-  return firstMonday;
+  // ISO 8601 logic: перший тиждень містить перший четвер року
+  // Це означає, що 1 січня має бути від понеділка до четверга
+  const jan4 = new Date(year, 0, 4);
+  return startOfWeek(jan4, { weekStartsOn: 1 });
 }
 
 // Отримати всі тижні GfK для місяця

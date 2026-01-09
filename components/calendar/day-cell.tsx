@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo, useState } from "react";
+import { memo, useMemo, useState, useEffect } from "react";
 import { isSameDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarDay } from "@/lib/calendar";
@@ -115,11 +115,26 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
     }
   };
 
+  // Handle Escape key to close tooltip
+  useEffect(() => {
+    if (!tooltipOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setTooltipOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [tooltipOpen]);
+
   const cellContent = (
     <div
       className={cn(cellStyles, isHoliday && "cursor-pointer")}
       role="gridcell"
       aria-label={ariaLabel}
+      aria-describedby={isHoliday && tooltipOpen ? `tooltip-${day.date.toISOString()}` : undefined}
       tabIndex={day.isCurrentMonth ? 0 : -1}
       onClick={handleCellClick}
     >

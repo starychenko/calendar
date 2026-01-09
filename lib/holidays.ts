@@ -7,14 +7,21 @@ export interface Holiday {
   isWeekend?: boolean;
 }
 
-// Cache for holidays by year to avoid recalculation
+// LRU Cache for holidays by year to avoid recalculation and prevent memory leak
+// Зберігаємо поточний рік + 2 попередніх + 2 наступних = максимум 5 років
+const MAX_CACHE_SIZE = 5;
 const holidaysCache = new Map<number, Holiday[]>();
 
+// Діапазон років для точного розрахунку Великодня
+export const EASTER_YEAR_MIN = 1900;
+export const EASTER_YEAR_MAX = 2100;
+
 // Функція для обчислення православного Великодня за алгоритмом Meeus (Julian calendar)
-function getEasterDate(year: number): Date {
+function getEasterDate(year: number): Date | null {
   // Validate year range for Easter calculation accuracy
-  if (year < 1900 || year > 2100) {
-    throw new Error(`Easter calculation is only valid for years 1900-2100, received: ${year}`);
+  if (year < EASTER_YEAR_MIN || year > EASTER_YEAR_MAX) {
+    console.warn(`Easter calculation is only valid for years ${EASTER_YEAR_MIN}-${EASTER_YEAR_MAX}, received: ${year}`);
+    return null;
   }
 
   // Алгоритм для юліанського календаря (православна Пасха)
@@ -39,7 +46,7 @@ function getEasterDate(year: number): Date {
  * Розрахунок дати відносно Великодня
  * @param year - Рік
  * @param daysOffset - Кількість днів до (від'ємне) або після (додатнє) Великодня
- * @returns Розрахована дата
+ * @returns Розрахована дата або null, якщо Великдень не може бути розрахований
  * @example
  * // Трійця (49 днів після Великодня)
  * getEasterBasedDate(2025, 49)
@@ -47,8 +54,10 @@ function getEasterDate(year: number): Date {
  * // Вербна неділя (7 днів до Великодня)
  * getEasterBasedDate(2025, -7)
  */
-function getEasterBasedDate(year: number, daysOffset: number): Date {
+function getEasterBasedDate(year: number, daysOffset: number): Date | null {
   const easter = getEasterDate(year);
+  if (!easter) return null;
+
   const easterTimestamp = easter.getTime();
   const offsetTimestamp = easterTimestamp + (daysOffset * 24 * 60 * 60 * 1000);
   return new Date(offsetTimestamp);
@@ -62,6 +71,9 @@ function getEasterBasedDate(year: number, daysOffset: number): Date {
 function getGreatLentPeriod(year: number): Holiday[] {
   const lentStart = getEasterBasedDate(year, -48); // Понеділок після Прощеної неділі
   const lentEnd = getEasterBasedDate(year, -1); // Субота перед Великоднем (Велика субота)
+
+  // Якщо Великдень не може бути розрахований, повертаємо порожній масив
+  if (!lentStart || !lentEnd) return [];
 
   const lentDays: Holiday[] = [];
   const currentDate = new Date(lentStart);
@@ -192,13 +204,26 @@ function getFixedReligiousHolidays(year: number): Holiday[] {
 
 // Рухомі релігійні свята (залежать від дати Великодня)
 function getMovableReligiousHolidays(year: number): Holiday[] {
-  return [
-    { name: "Прощена неділя", date: getEasterBasedDate(year, -49), type: "religious" },
-    { name: "Вербна неділя", date: getEasterBasedDate(year, -7), type: "religious" },
-    { name: "Великдень", date: getEasterDate(year), type: "religious" },
-    { name: "Вознесіння Господнє", date: getEasterBasedDate(year, 39), type: "religious" },
-    { name: "Трійця", date: getEasterBasedDate(year, 49), type: "religious" },
+  const easter = getEasterDate(year);
+
+  // Якщо Великдень не може бути розрахований, повертаємо порожній масив
+  if (!easter) return [];
+
+  const forgivennessSunday = getEasterBasedDate(year, -49);
+  const palmSunday = getEasterBasedDate(year, -7);
+  const ascension = getEasterBasedDate(year, 39);
+  const trinity = getEasterBasedDate(year, 49);
+
+  const holidays: Holiday[] = [
+    { name: "Великдень", date: easter, type: "religious" },
   ];
+
+  if (forgivennessSunday) holidays.push({ name: "Прощена неділя", date: forgivennessSunday, type: "religious" });
+  if (palmSunday) holidays.push({ name: "Вербна неділя", date: palmSunday, type: "religious" });
+  if (ascension) holidays.push({ name: "Вознесіння Господнє", date: ascension, type: "religious" });
+  if (trinity) holidays.push({ name: "Трійця", date: trinity, type: "religious" });
+
+  return holidays;
 }
 
 // Міжнародні свята
@@ -222,9 +247,13 @@ function getCommercialHolidays(year: number): Holiday[] {
 
 // Отримати всі свята для конкретного року
 export function getHolidaysForYear(year: number): Holiday[] {
-  // Check cache first
+  // Check cache first (LRU: move to end if found)
   if (holidaysCache.has(year)) {
-    return holidaysCache.get(year)!;
+    const cached = holidaysCache.get(year)!;
+    // Move to end (most recently used)
+    holidaysCache.delete(year);
+    holidaysCache.set(year, cached);
+    return cached;
   }
 
   const holidays: Holiday[] = [
@@ -235,6 +264,14 @@ export function getHolidaysForYear(year: number): Holiday[] {
     ...getCommercialHolidays(year),
     ...getGreatLentPeriod(year),
   ];
+
+  // Evict oldest entry if cache is full
+  if (holidaysCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = holidaysCache.keys().next().value;
+    if (firstKey !== undefined) {
+      holidaysCache.delete(firstKey);
+    }
+  }
 
   // Cache the result before returning
   holidaysCache.set(year, holidays);

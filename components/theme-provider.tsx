@@ -17,15 +17,6 @@ export function ThemeProvider() {
   // Обчислити фінальну тему
   const resolvedTheme = theme === "system" ? systemTheme : theme;
 
-  // Ініціалізація localStorage при першому завантаженні
-  useEffect(() => {
-    const stored = localStorage.getItem("fiscal-calendar-theme");
-    if (!stored) {
-      // Створити запис з дефолтною темою
-      setTheme("system");
-    }
-  }, [setTheme]);
-
   // Відстежувати зміни системної теми
   useEffect(() => {
     const updateSystemTheme = () => {
