@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo } from "react";
+import { memo, useMemo, useState } from "react";
 import { isSameDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CalendarDay } from "@/lib/calendar";
@@ -19,6 +19,9 @@ interface DayCellProps {
 }
 
 const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
+  // State for controlled tooltip (needed for mobile touch support)
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
   // Client-side check for current day (avoids build-time static value)
   const isToday = useMemo(() => isSameDay(day.date, new Date()), [day.date]);
 
@@ -105,12 +108,20 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
     ? `${day.day} ${monthName}, ${holidays.map(h => h.name).join(', ')}`
     : `${day.day} ${monthName}${isToday ? ', сьогодні' : ''}`;
 
+  // Handle click/touch to toggle tooltip on mobile devices
+  const handleCellClick = () => {
+    if (isHoliday) {
+      setTooltipOpen((prev) => !prev);
+    }
+  };
+
   const cellContent = (
     <div
-      className={cellStyles}
+      className={cn(cellStyles, isHoliday && "cursor-pointer")}
       role="gridcell"
       aria-label={ariaLabel}
       tabIndex={day.isCurrentMonth ? 0 : -1}
+      onClick={handleCellClick}
     >
       <span
         className={cn(
@@ -126,7 +137,7 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
 
   if (isHoliday) {
     return (
-      <Tooltip>
+      <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
         <TooltipTrigger asChild>
           {cellContent}
         </TooltipTrigger>
