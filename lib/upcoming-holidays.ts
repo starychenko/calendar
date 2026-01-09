@@ -13,12 +13,20 @@ export interface HolidayGroup {
 }
 
 /**
+ * Helper: отримати сьогоднішню дату в UTC (для consistency з lib/holidays.ts)
+ * Використовує UTC щоб уникнути timezone проблем при порівнянні з святами
+ */
+function getTodayUTC(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0));
+}
+
+/**
  * Отримати свята на наступні N днів від сьогодні
  * Групує послідовні дні Великого посту в один запис з періодом
  */
 export function getUpcomingHolidays(daysAhead: number = 60): HolidayGroup[] {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getTodayUTC();
   const endDate = addDays(today, daysAhead);
   const currentYear = today.getFullYear();
   const nextYear = endDate.getFullYear();
@@ -126,7 +134,7 @@ export function groupConsecutiveLentDays(
  * Отримати свята на сьогодні
  */
 export function getTodayHolidays(): HolidayGroup[] {
-  const today = new Date();
+  const today = getTodayUTC();
   const holidays = getHolidaysForDate(today);
 
   return holidays.map((holiday) => ({
@@ -186,10 +194,9 @@ function getDaysWord(count: number): string {
  * Повертає 0 якщо свято сьогодні, від'ємне число якщо свято вже минуло
  */
 export function getDaysUntilHoliday(holidayDate: Date): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getTodayUTC();
   const target = new Date(holidayDate);
-  target.setHours(0, 0, 0, 0);
+  target.setUTCHours(12, 0, 0, 0);
 
   const diffTime = target.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

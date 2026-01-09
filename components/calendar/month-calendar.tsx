@@ -20,9 +20,17 @@ const MonthCalendarComponent = ({ month, mode }: MonthCalendarProps) => {
   }, [month.monthNumber, month.year]);
 
   // Add CSS containment for performance - isolates layout calculations
-  const cardClassName = isCurrentMonth
-    ? "overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full p-0! gap-0! border-slate-200/60 dark:border-slate-700/60 ring-2 ring-slate-400/60 dark:ring-slate-500/60 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 [contain:layout_style]"
-    : "overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full p-0! gap-0! border-slate-200/60 dark:border-slate-700/60 shadow-md [contain:layout_style]";
+  const cardClassName = cn(
+    // Базові класи (спільні для всіх місяців)
+    "overflow-hidden hover:shadow-xl transition-shadow duration-300",
+    "flex flex-col h-full p-0! gap-0!",
+    "border-slate-200/60 dark:border-slate-700/60",
+    "[contain:layout_style]",
+    // Умовні класи для поточного місяця
+    isCurrentMonth
+      ? "ring-2 ring-slate-400/60 dark:ring-slate-500/60 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50"
+      : "shadow-md"
+  );
 
   const headerClassName = "py-3 px-4 relative shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-center";
 

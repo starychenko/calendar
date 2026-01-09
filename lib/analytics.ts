@@ -58,18 +58,26 @@ export function trackEvent(eventData: CalendarAnalyticsEvent): void {
     return;
   }
 
-  // Check if gtag is available (loaded by @next/third-parties/google)
-  if (!window.gtag) {
-    // In development, log that GA is not active
-    if (process.env.NODE_ENV === "development") {
-      console.log("[Analytics] Event tracked (dev mode):", eventData);
+  try {
+    // Check if gtag is available (loaded by @next/third-parties/google)
+    if (!window.gtag) {
+      // In development, log that GA is not active
+      if (process.env.NODE_ENV === "development") {
+        console.log("[Analytics] Event tracked (dev mode):", eventData);
+      }
+      return;
     }
-    return;
+
+    // Extract event name and parameters
+    const { event, ...params } = eventData;
+
+    // Send event to Google Analytics
+    window.gtag("event", event, params);
+  } catch (error) {
+    // Тихо ігноруємо помилки analytics (не повинні впливати на UX)
+    // Analytics може бути заблоковано ad-blockers або виникнути інші помилки
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[Analytics] Failed to track event:", error);
+    }
   }
-
-  // Extract event name and parameters
-  const { event, ...params } = eventData;
-
-  // Send event to Google Analytics
-  window.gtag("event", event, params);
 }

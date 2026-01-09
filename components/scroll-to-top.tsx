@@ -72,14 +72,10 @@ export function ScrollToTop() {
       onClick={scrollToTop}
       aria-label="Прокрутити вгору"
       className={`fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-[opacity,transform,shadow] duration-300 hover:scale-110 flex items-center justify-center ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
+        isVisible
+          ? "opacity-100 translate-y-0 [will-change:transform,opacity]"
+          : "opacity-0 translate-y-10 pointer-events-none [will-change:auto]"
       }`}
-      style={{
-        position: 'fixed',
-        bottom: '1.5rem',
-        right: '1.5rem',
-        willChange: isVisible ? 'transform, opacity' : 'auto'
-      }}
     >
         {/* Круговий прогрес індикатор */}
         <svg
