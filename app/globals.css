@@ -202,3 +202,33 @@ body {
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
+
+/* Анімація підказки для панелі свят - язичок пульсує/розтягується без відриву від краю */
+@keyframes bounce-hint {
+  0%, 100% {
+    transform: scaleX(1);
+  }
+  10% {
+    transform: scaleX(1.8);  /* Максимальне розтягування - перша пульсація */
+  }
+  20% {
+    transform: scaleX(1);
+  }
+  30% {
+    transform: scaleX(1.5);  /* Менше розтягування - друга пульсація */
+  }
+  40% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(1.25); /* Ще менше - третя пульсація */
+  }
+  60% {
+    transform: scaleX(1);
+  }
+}
+
+.animate-bounce-hint {
+  animation: bounce-hint 1.5s ease-in-out infinite;
+  transform-origin: left center;  /* Розтягування від лівого краю (язичок залишається притиснутим до екрану) */
+}
