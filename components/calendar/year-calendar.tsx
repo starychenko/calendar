@@ -107,7 +107,7 @@ export function YearCalendar() {
 
       {/* Сітка місяців */}
       <TooltipProvider delayDuration={300}>
-        <div className="calendar-grid gap-1.5 sm:gap-2.5 lg:gap-3 mx-auto">
+        <div className="calendar-grid gap-4 sm:gap-2.5 lg:gap-3 mx-auto">
           {months.map((month) => (
             <MonthCalendar
               key={`${month.year}-${month.monthNumber}`}
