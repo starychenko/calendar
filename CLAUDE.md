@@ -59,7 +59,8 @@ The default calendar system based on ISO 8601 standard:
 Alternative methodology for retail and marketing analytics:
 - Each month has a fixed number of weeks: 4 or 5
 - Quarterly pattern: 5-4-4, 4-5-4, 4-4-5, 5-4-4
-- Year starts on first Monday (or last Monday of previous year if Jan 1 is after Thursday)
+- Year starts on first Monday using ISO 8601 logic (first week contains first Thursday)
+- Uses `startOfWeek(jan4, { weekStartsOn: 1 })` to determine GfK year start
 - `getGfkMonthWeeks(year, month)` generates weeks based on fixed monthly allocation
 - `getGfkYearMonths(year)` generates full year with GfK week numbering
 
@@ -114,6 +115,8 @@ Minimalist Zustand store for theme preference:
 
 **Key Implementation Details:**
 - No race conditions between Zustand persist and ThemeProvider
+- ThemeProvider uses only local state for `systemTheme` (not Zustand)
+- Zustand store only tracks user preference (`theme: "light" | "dark" | "system"`)
 - User preference always persisted and respected
 - System theme detection happens client-side only
 - localStorage format: `{"state":{"theme":"system"},"version":0}`
@@ -123,21 +126,69 @@ Minimalist Zustand store for theme preference:
 Holidays are calculated dynamically for each year:
 - **Fixed dates**: National holidays (New Year, Independence Day, etc.)
 - **Calculated dates**:
-  - Easter (Великдень) - uses Gauss algorithm in `getEasterDate()`
+  - Easter (Великдень) - uses Meeus algorithm (Julian calendar) in `getEasterDate()`
   - Trinity (Трійця) - 49 days after Easter
   - Black Friday - day after 4th Thursday in November
   - Cyber Monday - 3 days after Black Friday
+  - Great Lent period (Великий піст) - 48 days before Easter
+
+**Year range limitations:**
+- Easter calculation valid for years 1900-2100 (constants: `EASTER_YEAR_MIN`, `EASTER_YEAR_MAX`)
+- Returns `null` with console warning for years outside this range
+- Provides graceful fallback instead of throwing exceptions
+- Year navigation buttons automatically disabled at boundaries
+
+**LRU Cache for performance:**
+- Holidays cached per year to avoid expensive recalculation
+- Maximum cache size: 5 years (current year ± 2 years typically)
+- Prevents memory leaks from unlimited cache growth
+- Cache evicts oldest entry when full (First In, First Out)
+- Implementation in `getHolidaysForYear()` function
+
+**Timezone handling:**
+- All dates created in UTC with `createDate()` helper: `Date.UTC(year, month, day, 12, 0, 0, 0)`
+- Prevents timezone-related bugs during calculations
+- Easter algorithm converts Julian to Gregorian calendar (+13 days offset for 1900-2099)
+- Consistent UTC usage across holiday system and upcoming holidays
 
 **Holiday types** affect visual styling (defined in lib/constants/holiday-styles.ts):
 - `national`: Blue gradient backgrounds, horizontal line indicator
 - `religious`: Purple gradient backgrounds, horizontal line indicator
 - `international`: Pink gradient backgrounds, horizontal line indicator
 - `commercial`: Amber/yellow gradient backgrounds, horizontal line indicator
+- `lent`: Subtle grey background for Great Lent period
 
 All holiday styles include:
 - Light mode: from-{color}-50 to {color}-100/80 gradient
 - Dark mode: from-{color}-950/40 to {color}-900/50 gradient
 - Consistent horizontal line indicators at bottom of day cell (w-2.5 h-0.5)
+
+### Upcoming Holidays System (lib/upcoming-holidays.ts)
+
+Helper utilities for finding and displaying upcoming holidays:
+
+**Core functions:**
+- `getTodayUTC()`: Returns current date in UTC for consistency with holiday calculations
+- `getUpcomingHolidays(daysAhead)`: Finds holidays in next N days (default: 60 days)
+- `groupConsecutiveLentDays()`: Groups Great Lent days into single period entry
+- `getTodayHolidays()`: Returns holidays for current date
+
+**Timezone consistency:**
+- Uses `getTodayUTC()` helper to ensure UTC alignment
+- Prevents timezone-related bugs when comparing with holiday dates
+- All date comparisons done in UTC (12:00:00 noon)
+- Matches timezone handling in `lib/holidays.ts`
+
+**Performance optimizations:**
+- Single `reduce()` operation for filtering and grouping
+- Sorts holidays on-the-fly (no extra array copies)
+- Efficient cross-year holiday lookup (handles year boundaries)
+
+**Date formatting helpers:**
+- `formatShortDate(date)`: Returns format like "9 січ"
+- `formatPeriod(start, end, days)`: Returns format like "10 лют - 28 бер (47 днів)"
+- `getDaysUntilHoliday(date)`: Calculates days remaining (0 = today, negative = past)
+- `formatDaysUntil(days)`: Returns text like "сьогодні", "завтра", "через 5 днів"
 
 ### Component Hierarchy
 
@@ -182,6 +233,9 @@ app/layout.tsx
 │       │               ├── Renders individual day
 │       │               ├── Shows holiday indicators with type-specific shapes
 │       │               ├── Wraps holidays with Tooltip for names
+│       │               ├── Controlled tooltip state for mobile touch support
+│       │               ├── Escape key handler to close tooltips
+│       │               ├── ARIA labels for accessibility (aria-label, aria-describedby)
 │       │               └── Displays "phantom" days from adjacent months
 │       │                   (grayed in ISO mode, normal in GfK mode)
 │       │
@@ -280,6 +334,8 @@ Components are added to `components/ui/` with New York style variant.
 ### Dynamic Header Navigation
 - Uses IntersectionObserver API to track visibility of main navigation
 - When main navigation scrolls out of view, duplicates controls in header
+- Optimized threshold: single value (0) instead of array for better performance
+- Root margin: `-64px` to compensate for header height
 - Smooth transitions with opacity and transform animations
 - Responsive design: hidden on mobile (<lg), visible on desktop
 - Prevents layout shift by maintaining header height
@@ -303,11 +359,14 @@ Components are added to `components/ui/` with New York style variant.
 - Dropdown menu in header for theme switching
 
 ### Scroll to Top Button
-- Uses `requestAnimationFrame` for performance
+- Uses `requestAnimationFrame` for performance optimization
+- Debounced state updates to prevent unnecessary re-renders
 - Circular progress indicator shows scroll percentage
-- Appears after 300px scroll
-- Smooth scroll animation
+- Appears after 300px scroll with smooth fade-in animation
+- Smooth scroll animation to top
 - Fixed position with z-index management
+- Tailwind arbitrary values instead of inline styles for better optimization
+- `will-change` property for optimized transitions
 
 ### Analytics (Google Analytics)
 - Integration via @next/third-parties/google package
@@ -319,6 +378,12 @@ Components are added to `components/ui/` with New York style variant.
   - `select_calendar_mode` - tracks ISO/GfK mode switching
   - `outbound_click` - tracks social media link clicks
 - Events tracked in YearNavigationControls component
+
+**Error handling and resilience:**
+- Wrapped in try/catch to prevent analytics errors from affecting UX
+- Gracefully handles ad-blocker scenarios where `window.gtag` is undefined
+- Development mode: logs events to console for debugging
+- Production mode: silently ignores tracking failures
 
 ### Responsive Design
 - Container uses responsive padding (px-8 to 3xl:px-96)
@@ -353,16 +418,48 @@ Required for production:
 
 Both are optional in development (safe fallbacks provided).
 
+**URL validation (lib/env.ts):**
+- `validateSiteUrl()` function validates and normalizes URLs
+- Removes trailing slashes for consistency
+- Catches invalid URLs and provides fallback: `http://localhost:3000`
+- Console warnings in development mode for invalid URLs
+- Production error if `NEXT_PUBLIC_SITE_URL` not set
+
 ## Important Notes
 
 - All text content is in Ukrainian (locale: `uk` from date-fns)
 - Language code in layout.tsx: `lang="uk"`
 - ISO 8601 week constant: `WEEKDAY_NAMES_SHORT` in lib/calendar.ts
-- Current year/month detection uses `new Date()` - no timezone handling needed for this use case
 - PWA icons automatically generated during build process via scripts/generate-icons.mjs
 - Theme system uses inline script to prevent FOUC (Flash of Unstyled Content)
 - localStorage keys: `fiscal-calendar-mode`, `fiscal-calendar-theme`
 - `suppressHydrationWarning` on `<html>` tag required for theme system
-- Performance optimizations: memoized calendar calculations, selective Zustand selectors
-- Accessibility: screen reader announcements, ARIA labels, keyboard navigation support
-- IntersectionObserver used for dynamic header navigation (threshold: [0, 0.1, 1], rootMargin: -64px)
+
+**Timezone handling:**
+- Holiday system uses UTC dates exclusively (`createDate()` helper)
+- Upcoming holidays use `getTodayUTC()` for consistency
+- All date comparisons done at 12:00:00 UTC to avoid timezone bugs
+- UI displays use local timezone (browser default)
+
+**Performance optimizations:**
+- LRU cache for holidays (max 5 years) prevents memory leaks
+- Memoized calendar calculations in components
+- Selective Zustand selectors to prevent unnecessary re-renders
+- IntersectionObserver optimized (threshold: 0, rootMargin: -64px)
+- ScrollToTop uses `requestAnimationFrame` with debounced updates
+- MonthCalendar uses CSS containment (`contain: layout style`)
+
+**Accessibility features:**
+- Screen reader announcements for mode changes (aria-live)
+- ARIA labels for all interactive elements
+- Keyboard navigation support (tab, Enter, Escape)
+- Escape key closes tooltips
+- Controlled tooltip state for mobile touch support
+- Holiday tooltips with aria-describedby linking
+
+**Error handling:**
+- Easter calculation validates year range (1900-2100)
+- Graceful fallbacks instead of throwing exceptions
+- Analytics wrapped in try/catch (resilient to ad-blockers)
+- Environment variable validation with console warnings
+- TypeScript strict mode with proper type safety (no `any` types)
