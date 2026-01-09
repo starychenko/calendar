@@ -36,3 +36,12 @@ export const useCalendarStore = create<CalendarStore>()(
     }
   )
 );
+
+// Міграція: видалення застарілого ключа localStorage
+if (typeof window !== "undefined") {
+  const oldKey = "fiscal-calendar-storage";
+  if (localStorage.getItem(oldKey)) {
+    localStorage.removeItem(oldKey);
+    console.log("Видалено застарілий localStorage ключ:", oldKey);
+  }
+}
