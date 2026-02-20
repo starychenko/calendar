@@ -464,7 +464,7 @@ Both are optional in development (safe fallbacks provided).
 - ISO 8601 week constant: `WEEKDAY_NAMES_SHORT` in lib/calendar.ts
 - PWA icons automatically generated during build process via scripts/generate-icons.mjs
 - Theme system uses inline script to prevent FOUC (Flash of Unstyled Content)
-- localStorage keys: `fiscal-calendar-mode`, `fiscal-calendar-theme`
+- localStorage keys: `fiscal-calendar-mode`, `fiscal-calendar-theme`, `holidays-panel-state`, `holidays-panel-hint-shown`
 - `suppressHydrationWarning` on `<html>` tag required for theme system
 
 **Timezone handling:**
