@@ -213,21 +213,17 @@ export default function RootLayout({
                     document.documentElement.classList.remove('dark');
                   }
 
-                  // Language: Set html lang attribute from localStorage
+                  // Language: Read locale and expose as global for Zustand initial value
                   var langStored = localStorage.getItem('fiscal-calendar-lang');
                   if (langStored) {
                     var langParsed = JSON.parse(langStored);
                     var locale = langParsed.state?.locale;
                     if (locale === 'en' || locale === 'uk') {
                       document.documentElement.lang = locale;
+                      window.__FISCAL_LOCALE__ = locale;
                     }
                   }
-
-                  // Mark as ready — CSS can unhide content
-                  document.documentElement.classList.add('lang-ready');
-                } catch (e) {
-                  document.documentElement.classList.add('lang-ready');
-                }
+                } catch (e) {}
               })();
             `,
           }}
