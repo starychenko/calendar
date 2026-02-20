@@ -37,4 +37,5 @@ next-env.d.ts
 # IDE
 .vscode
 .idea
-.claude
+.claude/*
+!.claude/rules/
