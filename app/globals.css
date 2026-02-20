@@ -120,6 +120,11 @@ body {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Hide content until language is resolved (prevents FOUC) */
+html:not(.lang-ready) body {
+  visibility: hidden;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

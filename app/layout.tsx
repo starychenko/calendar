@@ -222,7 +222,12 @@ export default function RootLayout({
                       document.documentElement.lang = locale;
                     }
                   }
-                } catch (e) {}
+
+                  // Mark as ready — CSS can unhide content
+                  document.documentElement.classList.add('lang-ready');
+                } catch (e) {
+                  document.documentElement.classList.add('lang-ready');
+                }
               })();
             `,
           }}
