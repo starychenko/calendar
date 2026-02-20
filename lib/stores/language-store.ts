@@ -6,6 +6,7 @@ export type Locale = "uk" | "en";
 declare global {
   interface Window {
     __FISCAL_LOCALE__?: Locale;
+    __FISCAL_MODE__?: import("@/lib/stores/calendar-store").CalendarMode;
   }
 }
 
