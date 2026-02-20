@@ -14,6 +14,7 @@ import {
   eachMonthOfInterval,
 } from "date-fns";
 import { uk } from "date-fns/locale";
+import type { Locale as DateFnsLocale } from "date-fns";
 
 export interface CalendarDay {
   date: Date;
@@ -121,13 +122,14 @@ export function createCalendarDay(
 }
 
 // Отримати всі місяці року
-export function getYearMonths(year: number): CalendarMonth[] {
+export function getYearMonths(year: number, dateFnsLocale?: DateFnsLocale): CalendarMonth[] {
+  const locale = dateFnsLocale ?? uk;
   const start = startOfYear(new Date(year, 0, 1));
   const end = endOfYear(new Date(year, 0, 1));
   const months = eachMonthOfInterval({ start, end });
 
   return months.map((month) => ({
-    name: format(month, "LLLL", { locale: uk }),
+    name: format(month, "LLLL", { locale }),
     monthNumber: month.getMonth(),
     year: month.getFullYear(),
     weeks: getMonthWeeks(month.getFullYear(), month.getMonth()),
@@ -135,9 +137,6 @@ export function getYearMonths(year: number): CalendarMonth[] {
 }
 
 // Форматувати назву місяця
-export function formatMonthName(month: number, year: number): string {
-  return format(new Date(year, month, 1), "LLLL", { locale: uk });
+export function formatMonthName(month: number, year: number, dateFnsLocale?: DateFnsLocale): string {
+  return format(new Date(year, month, 1), "LLLL", { locale: dateFnsLocale ?? uk });
 }
-
-// Скорочені назви днів тижня (ISO 8601: Пн, Вт, Ср, Чт, Пт, Сб, Нд)
-export const WEEKDAY_NAMES_SHORT: readonly string[] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"] as const;

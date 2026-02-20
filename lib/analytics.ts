@@ -38,6 +38,10 @@ export type CalendarAnalyticsEvent =
       event: "outbound_click";
       social_network: "linkedin" | "telegram" | "github";
       url: string;
+    }
+  | {
+      event: "select_language";
+      language: "uk" | "en";
     };
 
 /**

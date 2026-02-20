@@ -1,9 +1,11 @@
 import { addDays, format, isSameDay, isAfter, isBefore } from "date-fns";
 import { uk } from "date-fns/locale";
+import type { Locale as DateFnsLocale } from "date-fns";
 import { getHolidaysForDate, getHolidaysForYear, Holiday } from "./holidays";
 
 export interface HolidayGroup {
   name: string;
+  nameEn?: string;
   date?: Date; // Для одиночних свят
   startDate?: Date; // Для періодів (піст)
   endDate?: Date; // Для періодів (піст)
@@ -100,6 +102,7 @@ export function groupConsecutiveLentDays(
 
     grouped.push({
       name: lentDays[0].name,
+      nameEn: lentDays[0].nameEn,
       startDate: lentDays[0].date,
       endDate: lentDays[lentDays.length - 1].date,
       type: "lent",
@@ -114,6 +117,7 @@ export function groupConsecutiveLentDays(
   otherHolidays.forEach((holiday) => {
     grouped.push({
       name: holiday.name,
+      nameEn: holiday.nameEn,
       date: holiday.date,
       type: holiday.type,
       isPeriod: false,
@@ -139,6 +143,7 @@ export function getTodayHolidays(): HolidayGroup[] {
 
   return holidays.map((holiday) => ({
     name: holiday.name,
+    nameEn: holiday.nameEn,
     date: holiday.date,
     type: holiday.type,
     isPeriod: false,
@@ -147,46 +152,10 @@ export function getTodayHolidays(): HolidayGroup[] {
 
 /**
  * Форматувати дату для відображення (коротко)
- * Приклад: "9 січ"
+ * Приклад: "9 січ" / "9 Jan"
  */
-export function formatShortDate(date: Date): string {
-  return format(date, "d MMM", { locale: uk });
-}
-
-/**
- * Форматувати період для відображення
- * Приклад: "10 лют - 28 бер (47 днів)"
- */
-export function formatPeriod(
-  startDate: Date,
-  endDate: Date,
-  daysCount: number
-): string {
-  const start = formatShortDate(startDate);
-  const end = formatShortDate(endDate);
-  return `${start} - ${end} (${daysCount} ${getDaysWord(daysCount)})`;
-}
-
-/**
- * Отримати правильну форму слова "день/дні/днів"
- */
-function getDaysWord(count: number): string {
-  const lastDigit = count % 10;
-  const lastTwoDigits = count % 100;
-
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
-    return "днів";
-  }
-
-  if (lastDigit === 1) {
-    return "день";
-  }
-
-  if (lastDigit >= 2 && lastDigit <= 4) {
-    return "дні";
-  }
-
-  return "днів";
+export function formatShortDate(date: Date, dateFnsLocale?: DateFnsLocale): string {
+  return format(date, "d MMM", { locale: dateFnsLocale ?? uk });
 }
 
 /**
@@ -202,24 +171,4 @@ export function getDaysUntilHoliday(holidayDate: Date): number {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   return diffDays;
-}
-
-/**
- * Форматувати текст "через X днів" або "сьогодні"
- */
-export function formatDaysUntil(daysUntil: number): string {
-  if (daysUntil === 0) {
-    return "сьогодні";
-  }
-
-  if (daysUntil === 1) {
-    return "завтра";
-  }
-
-  if (daysUntil < 0) {
-    const daysAgo = Math.abs(daysUntil);
-    return `${daysAgo} ${getDaysWord(daysAgo)} тому`;
-  }
-
-  return `через ${daysUntil} ${getDaysWord(daysUntil)}`;
 }

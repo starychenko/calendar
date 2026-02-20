@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { ArrowUp } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
@@ -9,6 +10,7 @@ export function ScrollToTop() {
   const rafId = useRef<number | null>(null);
   const lastScrollY = useRef(0);
   const lastProgress = useRef(0);
+  const { t } = useTranslation();
 
   const updateScrollState = useCallback(() => {
     const scrollY = window.scrollY;
@@ -71,7 +73,7 @@ export function ScrollToTop() {
   return (
     <button
       onClick={scrollToTop}
-      aria-label="Прокрутити вгору"
+      aria-label={t.common.scrollToTop}
       className={`fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-[opacity,transform,shadow] duration-300 hover:scale-110 flex items-center justify-center ${
         isVisible
           ? "opacity-100 translate-y-0 [will-change:transform,opacity]"

@@ -9,6 +9,7 @@ import {
   getDay,
 } from "date-fns";
 import { uk } from "date-fns/locale";
+import type { Locale as DateFnsLocale } from "date-fns";
 import { CalendarDay, CalendarWeek, CalendarMonth } from "./calendar";
 
 // GfK (Growth from Knowledge) Period Mapping
@@ -81,14 +82,15 @@ export function getGfkMonthWeeks(year: number, month: number): CalendarWeek[] {
 }
 
 // Отримати всі місяці року за GfK методологією
-export function getGfkYearMonths(year: number): CalendarMonth[] {
+export function getGfkYearMonths(year: number, dateFnsLocale?: DateFnsLocale): CalendarMonth[] {
+  const locale = dateFnsLocale ?? uk;
   const months: CalendarMonth[] = [];
 
   for (let month = 0; month < 12; month++) {
     const monthDate = new Date(year, month, 1);
 
     months.push({
-      name: format(monthDate, "LLLL", { locale: uk }),
+      name: format(monthDate, "LLLL", { locale }),
       monthNumber: month,
       year,
       weeks: getGfkMonthWeeks(year, month),

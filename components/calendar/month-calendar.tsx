@@ -1,10 +1,11 @@
 "use client";
 
 import { memo, useMemo } from "react";
-import { CalendarMonth, WEEKDAY_NAMES_SHORT } from "@/lib/calendar";
+import { CalendarMonth } from "@/lib/calendar";
 import { WeekRow } from "./week-row";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface MonthCalendarProps {
   month: CalendarMonth;
@@ -12,6 +13,8 @@ interface MonthCalendarProps {
 }
 
 const MonthCalendarComponent = ({ month, mode }: MonthCalendarProps) => {
+  const { t } = useTranslation();
+
   // Memoize current date checks to avoid calling new Date() on every render
   const isCurrentMonth = useMemo(() => {
     const currentMonth = new Date().getMonth();
@@ -45,9 +48,9 @@ const MonthCalendarComponent = ({ month, mode }: MonthCalendarProps) => {
         {/* Заголовки стовпців */}
         <div className="grid grid-cols-8 bg-linear-to-b from-slate-100/80 to-slate-50/60 dark:from-slate-800/40 dark:to-slate-900/20 border-b border-slate-200/50 dark:border-slate-700/50">
           <div className="px-0.5 sm:px-1 py-1 sm:py-1.5 text-center border-r border-slate-300/50 dark:border-slate-600/50 bg-slate-100/70 dark:bg-slate-800/60 text-[10px] sm:text-xs font-semibold text-slate-600 dark:text-slate-400">
-            Тж
+            {t.calendar.weekAbbr}
           </div>
-          {WEEKDAY_NAMES_SHORT.map((day, index) => (
+          {t.calendar.weekdays.map((day, index) => (
             <div
               key={day}
               className={cn(
@@ -61,7 +64,7 @@ const MonthCalendarComponent = ({ month, mode }: MonthCalendarProps) => {
         </div>
 
         {/* Тижні */}
-        <div className="flex flex-col" role="grid" aria-label={`Календар на ${month.name} ${month.year}`}>
+        <div className="flex flex-col" role="grid" aria-label={t.calendar.calendarFor.replace("{month}", month.name).replace("{year}", String(month.year))}>
           {month.weeks.map((week, index) => (
             <WeekRow
               key={week.weekNumber}

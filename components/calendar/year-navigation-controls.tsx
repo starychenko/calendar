@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { EASTER_YEAR_MIN, EASTER_YEAR_MAX } from "@/lib/holidays";
+import { useTranslation } from "@/lib/i18n";
 
 interface YearNavigationControlsProps {
   year: number;
@@ -25,6 +26,8 @@ export function YearNavigationControls({
   onToggleMode,
   compact = false,
 }: YearNavigationControlsProps) {
+  const { t } = useTranslation();
+
   return (
     <div className={cn(
       "flex items-center",
@@ -45,7 +48,7 @@ export function YearNavigationControls({
             compact ? "h-7 w-7" : "h-8 w-8 sm:h-9 sm:w-9"
           )}
           disabled={year <= EASTER_YEAR_MIN}
-          aria-label={year <= EASTER_YEAR_MIN ? `Попередній рік (мінімальний рік: ${EASTER_YEAR_MIN})` : "Попередній рік"}
+          aria-label={year <= EASTER_YEAR_MIN ? t.calendar.previousYearMin.replace("{year}", String(EASTER_YEAR_MIN)) : t.calendar.previousYear}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -68,7 +71,7 @@ export function YearNavigationControls({
             compact ? "h-7 w-7" : "h-8 w-8 sm:h-9 sm:w-9"
           )}
           disabled={year >= EASTER_YEAR_MAX}
-          aria-label={year >= EASTER_YEAR_MAX ? `Наступний рік (максимальний рік: ${EASTER_YEAR_MAX})` : "Наступний рік"}
+          aria-label={year >= EASTER_YEAR_MAX ? t.calendar.nextYearMax.replace("{year}", String(EASTER_YEAR_MAX)) : t.calendar.nextYear}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -78,7 +81,7 @@ export function YearNavigationControls({
       <div className="h-4 w-px bg-border hidden sm:block" />
 
       {/* Mode Toggle */}
-      <div className="flex items-center gap-1.5" role="group" aria-label="Режим календаря">
+      <div className="flex items-center gap-1.5" role="group" aria-label={t.calendar.calendarMode}>
         <button
           onClick={() => {
             if (mode === "gfk") {
@@ -87,7 +90,7 @@ export function YearNavigationControls({
             }
           }}
           aria-pressed={mode === "iso"}
-          aria-label={`ISO 8601 режим${mode === "iso" ? " (активний)" : ""}`}
+          aria-label={mode === "iso" ? t.calendar.isoModeActive : t.calendar.isoMode}
           className={cn(
             "font-medium cursor-pointer transition-colors px-1.5 py-0.5 rounded",
             compact ? "text-xs" : "text-xs sm:text-sm",
@@ -107,7 +110,7 @@ export function YearNavigationControls({
             }
           }}
           aria-pressed={mode === "gfk"}
-          aria-label={`GFK режим${mode === "gfk" ? " (активний)" : ""}`}
+          aria-label={mode === "gfk" ? t.calendar.gfkModeActive : t.calendar.gfkMode}
           className={cn(
             "font-medium cursor-pointer transition-colors px-1.5 py-0.5 rounded",
             compact ? "text-xs" : "text-xs sm:text-sm",
@@ -136,7 +139,7 @@ export function YearNavigationControls({
           compact ? "h-7" : "h-8 sm:h-9 sm:text-sm"
         )}
       >
-        Сьогодні
+        {t.common.today}
       </Button>
     </div>
   );

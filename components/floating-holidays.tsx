@@ -15,12 +15,17 @@ import {
   getUpcomingHolidays,
   getTodayHolidays,
   formatShortDate,
-  formatPeriod,
   getDaysUntilHoliday,
-  formatDaysUntil,
   type HolidayGroup,
 } from "@/lib/upcoming-holidays";
 import { HOLIDAY_STYLES } from "@/lib/constants/holiday-styles";
+import {
+  useTranslation,
+  getHolidayName,
+  getDateFnsLocale,
+  formatDaysUntilLocalized,
+  formatPeriodLocalized,
+} from "@/lib/i18n";
 
 // Zustand store для збереження стану панелі
 import { create } from "zustand";
@@ -71,6 +76,7 @@ export function FloatingHolidays() {
   const [isMobile, setIsMobile] = useState(false);
   const [currentDateKey, setCurrentDateKey] = useState(getCurrentDateKey);
   const [showHint, setShowHint] = useState(false);
+  const { t, locale } = useTranslation();
 
   // Оновлюємо дату кожну хвилину для автоматичного оновлення свят о півночі
   useEffect(() => {
@@ -178,7 +184,7 @@ export function FloatingHolidays() {
               "backdrop-blur-sm",
               isOpen && "scale-0 opacity-0 pointer-events-none"
             )}
-            aria-label="Відкрити список свят"
+            aria-label={t.holidays.openList}
           >
             <Calendar className="w-5 h-5 shrink-0" />
             {todayHolidays.length > 0 && (
@@ -230,7 +236,7 @@ export function FloatingHolidays() {
           // Анімація підказки - язичок підстрибує вправо як м'ячик
           showHint && "animate-bounce-hint"
         )}
-        aria-label={isOpen ? "Закрити панель свят" : "Відкрити панель свят"}
+        aria-label={isOpen ? t.holidays.closePanel : t.holidays.openPanel}
       >
         {isOpen ? (
           <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
@@ -282,6 +288,9 @@ function HolidayPanelContent({
   onClose,
   isDesktop,
 }: HolidayPanelContentProps) {
+  const { t, locale } = useTranslation();
+  const dateFnsLocale = useMemo(() => getDateFnsLocale(locale), [locale]);
+
   return (
     <>
       {!isDesktop && (
@@ -289,10 +298,10 @@ function HolidayPanelContent({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-foreground">
-                Свята України
+                {t.holidays.holidaysOfUkraine}
               </h2>
               <p className="text-sm text-muted-foreground">
-                Поточні та найближчі свята
+                {t.holidays.currentAndUpcoming}
               </p>
             </div>
           </div>
@@ -307,7 +316,7 @@ function HolidayPanelContent({
         {todayHolidays.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-              Сьогодні • {formatShortDate(new Date())}
+              {t.time.today} • {formatShortDate(new Date(), dateFnsLocale)}
             </h3>
             <div className="space-y-2">
               {todayHolidays.map((holiday) => (
@@ -324,7 +333,7 @@ function HolidayPanelContent({
         {/* Найближчі свята */}
         <div>
           <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-            Найближчі свята
+            {t.holidays.upcoming}
           </h3>
           {upcomingHolidays.length > 0 ? (
             <div className="space-y-2">
@@ -341,7 +350,7 @@ function HolidayPanelContent({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground italic">
-              Немає найближчих свят на наступні 60 днів
+              {t.holidays.noUpcoming}
             </p>
           )}
         </div>
@@ -360,6 +369,10 @@ const HolidayCard = memo(function HolidayCard({
   isToday,
 }: HolidayCardProps) {
   const bgStyle = HOLIDAY_STYLES[holiday.type];
+  const { t, locale } = useTranslation();
+  const dateFnsLocale = useMemo(() => getDateFnsLocale(locale), [locale]);
+
+  const holidayName = getHolidayName(holiday, locale);
 
   // Мемоізація розрахунків днів до свята
   const { daysUntilText, dateText } = useMemo(() => {
@@ -368,16 +381,21 @@ const HolidayCard = memo(function HolidayCard({
 
     const dateText =
       holiday.isPeriod && holiday.startDate && holiday.endDate && holiday.daysCount
-        ? formatPeriod(holiday.startDate, holiday.endDate, holiday.daysCount)
+        ? formatPeriodLocalized(
+            formatShortDate(holiday.startDate, dateFnsLocale),
+            formatShortDate(holiday.endDate, dateFnsLocale),
+            holiday.daysCount,
+            locale
+          )
         : holiday.date
-        ? formatShortDate(holiday.date)
+        ? formatShortDate(holiday.date, dateFnsLocale)
         : "";
 
     return {
-      daysUntilText: formatDaysUntil(daysUntil),
+      daysUntilText: formatDaysUntilLocalized(daysUntil, locale, t),
       dateText,
     };
-  }, [holiday]);
+  }, [holiday, dateFnsLocale, locale, t]);
 
   return (
     <div
@@ -394,7 +412,7 @@ const HolidayCard = memo(function HolidayCard({
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-sm text-foreground">
-            {holiday.name}
+            {holidayName}
           </h4>
           <p className="text-xs text-muted-foreground mt-1">{dateText}</p>
           {!isToday && (

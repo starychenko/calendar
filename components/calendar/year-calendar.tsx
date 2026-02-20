@@ -7,9 +7,11 @@ import { useCalendarStore } from "@/lib/stores/calendar-store";
 import { MonthCalendar } from "./month-calendar";
 import { YearNavigationControls } from "./year-navigation-controls";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useTranslation, getDateFnsLocale } from "@/lib/i18n";
 
 export function YearCalendar() {
   const navigationRef = useRef<HTMLDivElement>(null);
+  const { t, locale } = useTranslation();
 
   // Use selective selectors to prevent unnecessary re-renders
   const year = useCalendarStore((state) => state.year);
@@ -18,10 +20,12 @@ export function YearCalendar() {
   const toggleMode = useCalendarStore((state) => state.toggleMode);
   const setNavigationVisible = useCalendarStore((state) => state.setNavigationVisible);
 
+  const dateFnsLocale = useMemo(() => getDateFnsLocale(locale), [locale]);
+
   // Memoize calendar calculations - expensive operation
   const months = useMemo(() => {
-    return mode === "iso" ? getYearMonths(year) : getGfkYearMonths(year);
-  }, [year, mode]);
+    return mode === "iso" ? getYearMonths(year, dateFnsLocale) : getGfkYearMonths(year, dateFnsLocale);
+  }, [year, mode, dateFnsLocale]);
 
   // Memoize event handlers
   const handlePreviousYear = useCallback(() => setYear(year - 1), [year, setYear]);
@@ -55,7 +59,7 @@ export function YearCalendar() {
     <div className="space-y-4">
       {/* Screen reader announcement for mode changes */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {mode === "iso" ? "ISO 8601 режим активовано" : "GFK режим активовано"}
+        {mode === "iso" ? t.calendar.isoActivated : t.calendar.gfkActivated}
       </div>
 
       {/* Навігація та легенда - не sticky на lg+ (бо буде в header) */}
@@ -79,23 +83,23 @@ export function YearCalendar() {
         <div className="hidden sm:flex flex-wrap justify-center gap-2 sm:gap-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 bg-blue-500" />
-            <span>Національні</span>
+            <span>{t.holidays.national}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 bg-purple-500" />
-            <span>Релігійні</span>
+            <span>{t.holidays.religious}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 bg-pink-500" />
-            <span>Міжнародні</span>
+            <span>{t.holidays.international}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 bg-amber-500" />
-            <span>Комерційні</span>
+            <span>{t.holidays.commercial}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 bg-red-400/60" />
-            <span>Вихідні</span>
+            <span>{t.holidays.weekends}</span>
           </div>
         </div>
       </div>

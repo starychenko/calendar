@@ -4,13 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Calendar } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 import { YearNavigationControls } from "@/components/calendar/year-navigation-controls";
 import { useCalendarStore } from "@/lib/stores/calendar-store";
+import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const pathname = usePathname();
   const isHomePage = pathname === "/";
+  const { t } = useTranslation();
 
   const year = useCalendarStore((state) => state.year);
   const setYear = useCalendarStore((state) => state.setYear);
@@ -31,7 +34,7 @@ export function Header() {
           <div className="col-start-1 justify-self-start z-10">
             <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
               <Calendar className="h-6 w-6 text-primary" />
-              <h1 className="font-bold text-lg whitespace-nowrap">Фіскальний календар</h1>
+              <h1 className="font-bold text-lg whitespace-nowrap">{t.common.fiscalCalendar}</h1>
             </Link>
           </div>
 
@@ -58,8 +61,9 @@ export function Header() {
             </div>
           )}
 
-          {/* Theme Toggle - колонка 3 (праворуч) */}
-          <div className="col-start-3 justify-self-end z-10">
+          {/* Language + Theme Toggle - колонка 3 (праворуч) */}
+          <div className="col-start-3 justify-self-end z-10 flex items-center gap-1">
+            <LanguageToggle />
             <ThemeToggle />
           </div>
         </div>
