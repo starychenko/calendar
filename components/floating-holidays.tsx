@@ -115,26 +115,33 @@ export function FloatingHolidays() {
     // Перевіряємо налаштування accessibility (зменшення руху)
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    let showTimer: NodeJS.Timeout | undefined;
+    let hideTimer: NodeJS.Timeout | undefined;
+
     if (!hintShown && !isMobile && !isOpen && !prefersReducedMotion) {
       // Показуємо підказку через 2 секунди після завантаження
-      const timer = setTimeout(() => {
+      showTimer = setTimeout(() => {
         setShowHint(true);
 
         // Приховуємо підказку через 3 секунди
-        const hideTimer = setTimeout(() => {
+        hideTimer = setTimeout(() => {
           setShowHint(false);
           localStorage.setItem("holidays-panel-hint-shown", "true");
         }, 3000);
-
-        return () => clearTimeout(hideTimer);
       }, 2000);
-
-      return () => clearTimeout(timer);
     }
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
   }, [isMobile, isOpen]);
 
   // Мемоізація з залежністю від дати для автоматичного оновлення
+  // currentDateKey використовується як cache-buster для перерахунку при зміні дати
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const todayHolidays = useMemo(() => getTodayHolidays(), [currentDateKey]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const upcomingHolidays = useMemo(() => getUpcomingHolidays(60), [currentDateKey]);
 
   const handleToggle = () => {
