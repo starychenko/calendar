@@ -9,13 +9,6 @@ declare global {
   }
 }
 
-function getInitialLocale(): Locale {
-  if (typeof window !== "undefined" && window.__FISCAL_LOCALE__) {
-    return window.__FISCAL_LOCALE__;
-  }
-  return "uk";
-}
-
 interface LanguageStore {
   locale: Locale;
   setLocale: (locale: Locale) => void;
@@ -24,7 +17,7 @@ interface LanguageStore {
 export const useLanguageStore = create<LanguageStore>()(
   persist(
     (set) => ({
-      locale: getInitialLocale(),
+      locale: "uk",
       setLocale: (locale) => set({ locale }),
     }),
     {
@@ -33,6 +26,7 @@ export const useLanguageStore = create<LanguageStore>()(
       partialize: (state) => ({
         locale: state.locale,
       }),
+      skipHydration: true,
     }
   )
 );
