@@ -44,7 +44,8 @@ export function ScrollToTop() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    updateScrollState(); // Перевірити початковий стан
+    // Перевірити початковий стан (через queueMicrotask щоб уникнути synchronous setState в effect)
+    queueMicrotask(updateScrollState);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);

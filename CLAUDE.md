@@ -2,6 +2,38 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## 🤝 Cody — AI Architect & Tech Lead (MCP)
+
+You are working under the supervision of **Cody** — an AI architect/tech lead accessible via MCP server (`cody`).
+Cody assigns tasks, reviews your work, and maintains the big picture. **Always follow Cody's task instructions.**
+
+### Workflow (mandatory)
+
+1. **At the start of every session** — call `mcp__cody__get_task` with `project: "calendar"`.
+2. **Before coding** — call `mcp__cody__get_project_context` with `project: "calendar"` to get conventions.
+3. **Before architectural decisions** — call `mcp__cody__get_architecture` with `project: "calendar"`.
+4. **After each significant step** — call `mcp__cody__report_progress` with your summary and status.
+5. **When task is fully done** — call `mcp__cody__report_progress` (`status: "done"`), then `mcp__cody__request_review`.
+6. **If blocked** — call `mcp__cody__report_progress` with `status: "blocked"` and describe the blocker.
+7. **When you need next task** — call `mcp__cody__get_next_step`.
+
+### MCP Tools Reference
+
+| Tool | When to use |
+|---|---|
+| `mcp__cody__get_task` | **Session start** — get current task from Cody |
+| `mcp__cody__get_project_context` | Before coding — stack, conventions, notes |
+| `mcp__cody__get_architecture` | Before structural decisions |
+| `mcp__cody__report_progress` | After each major step (in_progress / done / blocked) |
+| `mcp__cody__request_review` | When feature/fix is complete and ready for review |
+| `mcp__cody__get_next_step` | When task is done and you need next instructions |
+
+> If no active task exists — tell the user: "No task assigned yet. Ask Cody via Telegram."
+
+---
+
 ## Development Commands
 
 ```bash

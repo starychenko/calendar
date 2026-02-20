@@ -82,6 +82,27 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
     return cn(baseStyles, borderBottom, "hover:bg-slate-50/60 dark:hover:bg-slate-800/30");
   }, [isToday, isHoliday, holidayStyles, day.isWeekend, isLast]);
 
+  // Handle click/touch to toggle tooltip on mobile devices
+  const handleCellClick = () => {
+    if (isHoliday) {
+      setTooltipOpen((prev) => !prev);
+    }
+  };
+
+  // Handle Escape key to close tooltip
+  useEffect(() => {
+    if (!tooltipOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setTooltipOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [tooltipOpen]);
+
   // Показуємо "фантомні" дні з інших місяців
   if (!day.isCurrentMonth) {
     return (
@@ -107,27 +128,6 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
   const ariaLabel = isHoliday
     ? `${day.day} ${monthName}, ${holidays.map(h => h.name).join(', ')}`
     : `${day.day} ${monthName}${isToday ? ', сьогодні' : ''}`;
-
-  // Handle click/touch to toggle tooltip on mobile devices
-  const handleCellClick = () => {
-    if (isHoliday) {
-      setTooltipOpen((prev) => !prev);
-    }
-  };
-
-  // Handle Escape key to close tooltip
-  useEffect(() => {
-    if (!tooltipOpen) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setTooltipOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [tooltipOpen]);
 
   const cellContent = (
     <div
