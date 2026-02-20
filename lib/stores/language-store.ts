@@ -8,10 +8,17 @@ interface LanguageStore {
   setLocale: (locale: Locale) => void;
 }
 
+const getInitialLocale = (): Locale => {
+  if (typeof document !== "undefined") {
+    if (document.documentElement.lang === "en") return "en";
+  }
+  return "uk";
+};
+
 export const useLanguageStore = create<LanguageStore>()(
   persist(
     (set) => ({
-      locale: "uk",
+      locale: getInitialLocale(),
       setLocale: (locale) => set({ locale }),
     }),
     {
