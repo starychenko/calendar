@@ -3,6 +3,19 @@ import { persist } from "zustand/middleware";
 
 export type Locale = "uk" | "en";
 
+declare global {
+  interface Window {
+    __FISCAL_LOCALE__?: Locale;
+  }
+}
+
+function getInitialLocale(): Locale {
+  if (typeof window !== "undefined" && window.__FISCAL_LOCALE__) {
+    return window.__FISCAL_LOCALE__;
+  }
+  return "uk";
+}
+
 interface LanguageStore {
   locale: Locale;
   setLocale: (locale: Locale) => void;
@@ -11,7 +24,7 @@ interface LanguageStore {
 export const useLanguageStore = create<LanguageStore>()(
   persist(
     (set) => ({
-      locale: "uk",
+      locale: getInitialLocale(),
       setLocale: (locale) => set({ locale }),
     }),
     {
@@ -20,7 +33,6 @@ export const useLanguageStore = create<LanguageStore>()(
       partialize: (state) => ({
         locale: state.locale,
       }),
-      skipHydration: true,
     }
   )
 );
