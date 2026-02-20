@@ -6,6 +6,7 @@ import { ScrollToTop } from "@/components/scroll-to-top";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Analytics } from "@/components/analytics";
+import { SkipToMain } from "@/components/skip-to-main";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
@@ -189,26 +190,37 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  // Read from localStorage or use default
-                  const stored = localStorage.getItem('fiscal-calendar-theme');
-                  let theme = 'system'; // Default theme
+                  // Theme: Read from localStorage or use default
+                  var stored = localStorage.getItem('fiscal-calendar-theme');
+                  var theme = 'system';
 
                   if (stored) {
-                    const { state } = JSON.parse(stored);
-                    theme = state?.theme || 'system';
+                    var parsed = JSON.parse(stored);
+                    theme = parsed.state?.theme || 'system';
                   }
 
-                  const getSystemTheme = () =>
-                    window.matchMedia('(prefers-color-scheme: dark)').matches
+                  var getSystemTheme = function() {
+                    return window.matchMedia('(prefers-color-scheme: dark)').matches
                       ? 'dark'
                       : 'light';
+                  };
 
-                  const resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
+                  var resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
 
                   if (resolvedTheme === 'dark') {
                     document.documentElement.classList.add('dark');
                   } else {
                     document.documentElement.classList.remove('dark');
+                  }
+
+                  // Language: Set html lang attribute from localStorage
+                  var langStored = localStorage.getItem('fiscal-calendar-lang');
+                  if (langStored) {
+                    var langParsed = JSON.parse(langStored);
+                    var locale = langParsed.state?.locale;
+                    if (locale === 'en' || locale === 'uk') {
+                      document.documentElement.lang = locale;
+                    }
                   }
                 } catch (e) {}
               })();
@@ -226,12 +238,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <Providers>
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          >
-            Перейти до основного вмісту
-          </a>
+          <SkipToMain />
           <div className="flex min-h-screen flex-col">
             <Header />
             <main id="main-content" className="flex-1">

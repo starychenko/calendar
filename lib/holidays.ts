@@ -2,6 +2,7 @@ import { getYear, isSameDay } from "date-fns";
 
 export interface Holiday {
   name: string;
+  nameEn: string;
   date: Date;
   type: "national" | "international" | "religious" | "commercial" | "lent";
   isWeekend?: boolean;
@@ -81,6 +82,7 @@ function getGreatLentPeriod(year: number): Holiday[] {
   while (currentDate <= lentEnd) {
     lentDays.push({
       name: "Великий піст",
+      nameEn: "Great Lent",
       date: new Date(currentDate),
       type: "lent",
     });
@@ -130,18 +132,20 @@ function createDate(year: number, month: number, day: number): Date {
 // Національні свята України
 function getNationalHolidays(year: number): Holiday[] {
   return [
-    { name: "Новий рік", date: createDate(year, 0, 1), type: "national" },
-    { name: "День праці", date: createDate(year, 4, 1), type: "national" },
+    { name: "Новий рік", nameEn: "New Year's Day", date: createDate(year, 0, 1), type: "national" },
+    { name: "День праці", nameEn: "Labour Day", date: createDate(year, 4, 1), type: "national" },
     {
       name: "День пам'яті та перемоги над нацизмом у Другій світовій війні",
+      nameEn: "Day of Remembrance and Victory over Nazism in WWII",
       date: createDate(year, 4, 8),
       type: "national",
     },
-    { name: "День Конституції України", date: createDate(year, 5, 28), type: "national" },
-    { name: "День Української Державності", date: createDate(year, 6, 15), type: "national" },
-    { name: "День незалежності України", date: createDate(year, 7, 24), type: "national" },
+    { name: "День Конституції України", nameEn: "Constitution Day of Ukraine", date: createDate(year, 5, 28), type: "national" },
+    { name: "День Української Державності", nameEn: "Ukrainian Statehood Day", date: createDate(year, 6, 15), type: "national" },
+    { name: "День незалежності України", nameEn: "Independence Day of Ukraine", date: createDate(year, 7, 24), type: "national" },
     {
       name: "День захисників і захисниць України",
+      nameEn: "Defenders of Ukraine Day",
       date: createDate(year, 9, 1),
       type: "national",
     },
@@ -152,53 +156,57 @@ function getNationalHolidays(year: number): Holiday[] {
 function getFixedReligiousHolidays(year: number): Holiday[] {
   return [
     // Січень
-    { name: "Богоявлення (Водохреще)", date: createDate(year, 0, 6), type: "religious" },
+    { name: "Богоявлення (Водохреще)", nameEn: "Epiphany (Theophany)", date: createDate(year, 0, 6), type: "religious" },
 
     // Лютий
-    { name: "Стрітення Господнє", date: createDate(year, 1, 2), type: "religious" },
+    { name: "Стрітення Господнє", nameEn: "Candlemas", date: createDate(year, 1, 2), type: "religious" },
 
     // Березень
-    { name: "Благовіщення", date: createDate(year, 2, 25), type: "religious" },
+    { name: "Благовіщення", nameEn: "Annunciation", date: createDate(year, 2, 25), type: "religious" },
 
     // Квітень
-    { name: "Святого Юрія (Георгія) Переможця", date: createDate(year, 3, 23), type: "religious" },
+    { name: "Святого Юрія (Георгія) Переможця", nameEn: "Saint George's Day", date: createDate(year, 3, 23), type: "religious" },
 
     // Червень
     {
       name: "Різдво Іоанна Хрестителя (Івана Купала)",
+      nameEn: "Nativity of John the Baptist (Ivan Kupala)",
       date: createDate(year, 5, 24),
       type: "religious",
     },
-    { name: "Апостолів Петра і Павла", date: createDate(year, 5, 29), type: "religious" },
+    { name: "Апостолів Петра і Павла", nameEn: "Saints Peter and Paul Day", date: createDate(year, 5, 29), type: "religious" },
 
     // Серпень
     {
       name: "Преображення Господнє (Яблучний Спас)",
+      nameEn: "Transfiguration (Apple Saviour)",
       date: createDate(year, 7, 6),
       type: "religious",
     },
-    { name: "Успіння Пресвятої Богородиці", date: createDate(year, 7, 15), type: "religious" },
+    { name: "Успіння Пресвятої Богородиці", nameEn: "Dormition of the Mother of God", date: createDate(year, 7, 15), type: "religious" },
 
     // Вересень
-    { name: "Різдво Пресвятої Богородиці", date: createDate(year, 8, 8), type: "religious" },
+    { name: "Різдво Пресвятої Богородиці", nameEn: "Nativity of the Mother of God", date: createDate(year, 8, 8), type: "religious" },
     {
       name: "Воздвиження Хреста Господнього",
+      nameEn: "Exaltation of the Holy Cross",
       date: createDate(year, 8, 14),
       type: "religious",
     },
 
     // Листопад
-    { name: "Собор Архистратига Михаїла", date: createDate(year, 10, 8), type: "religious" },
+    { name: "Собор Архистратига Михаїла", nameEn: "Synaxis of Archangel Michael", date: createDate(year, 10, 8), type: "religious" },
     {
       name: "Введення в храм Пресвятої Богородиці",
+      nameEn: "Presentation of the Mother of God",
       date: createDate(year, 10, 21),
       type: "religious",
     },
 
     // Грудень
-    { name: "Святого Миколая", date: createDate(year, 11, 6), type: "religious" },
-    { name: "Різдво Христове", date: createDate(year, 11, 25), type: "religious" },
-    { name: "Щедрий вечір (Маланки)", date: createDate(year, 11, 31), type: "religious" },
+    { name: "Святого Миколая", nameEn: "Saint Nicholas Day", date: createDate(year, 11, 6), type: "religious" },
+    { name: "Різдво Христове", nameEn: "Christmas", date: createDate(year, 11, 25), type: "religious" },
+    { name: "Щедрий вечір (Маланки)", nameEn: "Generous Evening (Malanka)", date: createDate(year, 11, 31), type: "religious" },
   ];
 }
 
@@ -215,13 +223,13 @@ function getMovableReligiousHolidays(year: number): Holiday[] {
   const trinity = getEasterBasedDate(year, 49);
 
   const holidays: Holiday[] = [
-    { name: "Великдень", date: easter, type: "religious" },
+    { name: "Великдень", nameEn: "Easter (Pascha)", date: easter, type: "religious" },
   ];
 
-  if (forgivennessSunday) holidays.push({ name: "Прощена неділя", date: forgivennessSunday, type: "religious" });
-  if (palmSunday) holidays.push({ name: "Вербна неділя", date: palmSunday, type: "religious" });
-  if (ascension) holidays.push({ name: "Вознесіння Господнє", date: ascension, type: "religious" });
-  if (trinity) holidays.push({ name: "Трійця", date: trinity, type: "religious" });
+  if (forgivennessSunday) holidays.push({ name: "Прощена неділя", nameEn: "Forgiveness Sunday", date: forgivennessSunday, type: "religious" });
+  if (palmSunday) holidays.push({ name: "Вербна неділя", nameEn: "Palm Sunday", date: palmSunday, type: "religious" });
+  if (ascension) holidays.push({ name: "Вознесіння Господнє", nameEn: "Ascension Day", date: ascension, type: "religious" });
+  if (trinity) holidays.push({ name: "Трійця", nameEn: "Pentecost (Trinity)", date: trinity, type: "religious" });
 
   return holidays;
 }
@@ -229,8 +237,8 @@ function getMovableReligiousHolidays(year: number): Holiday[] {
 // Міжнародні свята
 function getInternationalHolidays(year: number): Holiday[] {
   return [
-    { name: "День Святого Валентина", date: createDate(year, 1, 14), type: "international" },
-    { name: "Міжнародний жіночий день", date: createDate(year, 2, 8), type: "international" },
+    { name: "День Святого Валентина", nameEn: "Valentine's Day", date: createDate(year, 1, 14), type: "international" },
+    { name: "Міжнародний жіночий день", nameEn: "International Women's Day", date: createDate(year, 2, 8), type: "international" },
   ];
 }
 
@@ -240,8 +248,8 @@ function getCommercialHolidays(year: number): Holiday[] {
   const cyberMonday = getCyberMonday(year);
 
   return [
-    { name: "Чорна п'ятниця", date: blackFriday, type: "commercial" },
-    { name: "Кіберпонеділок", date: cyberMonday, type: "commercial" },
+    { name: "Чорна п'ятниця", nameEn: "Black Friday", date: blackFriday, type: "commercial" },
+    { name: "Кіберпонеділок", nameEn: "Cyber Monday", date: cyberMonday, type: "commercial" },
   ];
 }
 

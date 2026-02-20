@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { CalendarDay } from "@/lib/calendar";
 import { getHolidaysForDate } from "@/lib/holidays";
 import { HOLIDAY_STYLES, HOLIDAY_INDICATORS } from "@/lib/constants/holiday-styles";
+import { useTranslation, getHolidayName } from "@/lib/i18n";
 import {
   Tooltip,
   TooltipContent,
@@ -21,6 +22,7 @@ interface DayCellProps {
 const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
   // State for controlled tooltip (needed for mobile touch support)
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const { t, locale } = useTranslation();
 
   // Client-side check for current day (avoids build-time static value)
   const isToday = useMemo(() => isSameDay(day.date, new Date()), [day.date]);
@@ -105,10 +107,11 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
 
   // Показуємо "фантомні" дні з інших місяців
   if (!day.isCurrentMonth) {
+    const monthNameLocale = locale === "en" ? "en-US" : "uk";
     return (
       <div
         role="gridcell"
-        aria-label={`${day.day} ${day.date.toLocaleDateString('uk', { month: 'long' })}`}
+        aria-label={`${day.day} ${day.date.toLocaleDateString(monthNameLocale, { month: 'long' })}`}
         className={cn(
           "relative aspect-square flex flex-col items-center justify-center border-r last:border-r-0 border-slate-200/40 dark:border-slate-700/40",
           // У ISO режимі - сірі цифри, у GFK - звичайні
@@ -124,10 +127,11 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
     );
   }
 
-  const monthName = day.date.toLocaleDateString('uk', { month: 'long' });
+  const monthNameLocale = locale === "en" ? "en-US" : "uk";
+  const monthName = day.date.toLocaleDateString(monthNameLocale, { month: 'long' });
   const ariaLabel = isHoliday
-    ? `${day.day} ${monthName}, ${holidays.map(h => h.name).join(', ')}`
-    : `${day.day} ${monthName}${isToday ? ', сьогодні' : ''}`;
+    ? `${day.day} ${monthName}, ${holidays.map(h => getHolidayName(h, locale)).join(', ')}`
+    : `${day.day} ${monthName}${isToday ? t.aria.todaySuffix : ''}`;
 
   const cellContent = (
     <div
@@ -162,11 +166,11 @@ const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
           className="px-2.5 py-1.5 text-xs max-w-[calc(100vw-2rem)] sm:max-w-xs"
         >
           {holidays.length === 1 ? (
-            <p>{holidays[0].name}</p>
+            <p>{getHolidayName(holidays[0], locale)}</p>
           ) : (
             <ul className="space-y-0.5 list-none">
               {holidays.map((holiday, index) => (
-                <li key={index}>{holiday.name}</li>
+                <li key={index}>{getHolidayName(holiday, locale)}</li>
               ))}
             </ul>
           )}

@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { Calendar, Github, Linkedin, Send } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { useTranslation } from "@/lib/i18n";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { t } = useTranslation();
 
   return (
     <footer className="w-full border-t bg-background">
@@ -15,16 +17,16 @@ export function Footer() {
           <div className="space-y-4 max-w-md">
             <div className="flex items-center gap-2.5">
               <Calendar className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">Фіскальний календар</span>
+              <span className="font-bold text-lg">{t.common.fiscalCalendar}</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Календар з фіскальними тижнями за стандартами ISO 8601 та GFK — незамінний інструмент для бізнесу в Україні.
+              {t.footer.description}
             </p>
           </div>
 
           {/* Contact & Social */}
           <div className="space-y-4 md:text-right md:flex md:flex-col md:items-end">
-            <h3 className="font-semibold text-sm">Контакти</h3>
+            <h3 className="font-semibold text-sm">{t.footer.contacts}</h3>
             <div className="flex flex-col gap-3 md:items-end">
               <a
                 href="https://www.linkedin.com/in/yevhenii-starychenko-016313149/"
@@ -82,14 +84,14 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} Фіскальний календар України. Всі права захищені.
+              {t.footer.copyright.replace("{year}", String(currentYear))}
             </p>
             <div className="flex gap-6 text-sm text-muted-foreground">
               <Link href="/privacy" className="hover:text-foreground transition-colors">
-                Конфіденційність
+                {t.footer.privacy}
               </Link>
               <Link href="/terms" className="hover:text-foreground transition-colors">
-                Умови використання
+                {t.footer.terms}
               </Link>
             </div>
           </div>
