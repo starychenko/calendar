@@ -120,6 +120,11 @@ body {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Hide body until React hydrates when client state differs from SSR defaults (locale≠uk, mode≠iso) */
+html.needs-hydration body {
+  visibility: hidden;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -31,8 +31,8 @@ export const useCalendarStore = create<CalendarStore>()(
       name: "fiscal-calendar-mode",
       partialize: (state) => ({
         mode: state.mode,
-        // Don't persist year and navigationVisible
       }),
+      skipHydration: true,
     }
   )
 );

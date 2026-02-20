@@ -213,7 +213,9 @@ export default function RootLayout({
                     document.documentElement.classList.remove('dark');
                   }
 
-                  // Language: Read locale and expose as global for Zustand initial value
+                  // Language & Calendar mode: read from localStorage, expose as globals
+                  var needsHydration = false;
+
                   var langStored = localStorage.getItem('fiscal-calendar-lang');
                   if (langStored) {
                     var langParsed = JSON.parse(langStored);
@@ -221,7 +223,23 @@ export default function RootLayout({
                     if (locale === 'en' || locale === 'uk') {
                       document.documentElement.lang = locale;
                       window.__FISCAL_LOCALE__ = locale;
+                      if (locale !== 'uk') needsHydration = true;
                     }
+                  }
+
+                  var modeStored = localStorage.getItem('fiscal-calendar-mode');
+                  if (modeStored) {
+                    var modeParsed = JSON.parse(modeStored);
+                    var mode = modeParsed.state?.mode;
+                    if (mode === 'gfk' || mode === 'iso') {
+                      window.__FISCAL_MODE__ = mode;
+                      if (mode !== 'iso') needsHydration = true;
+                    }
+                  }
+
+                  // Hide body until React hydrates with correct state
+                  if (needsHydration) {
+                    document.documentElement.classList.add('needs-hydration');
                   }
                 } catch (e) {}
               })();
