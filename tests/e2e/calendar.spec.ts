@@ -266,10 +266,23 @@ test("desktop calendar and dark theme pass accessibility checks", async ({
       await page.getByRole("menuitem", { name: "Темна", exact: true }).click();
       await expect(page.locator("html")).toHaveClass(/dark/);
     }
-    // Exercise the whole page before scanning. WebKit defers inherited color
-    // recalculation in offscreen content until it enters the viewport.
     await page.locator("footer").scrollIntoViewIfNeeded();
     await page.getByRole("grid").first().scrollIntoViewIfNeeded();
+    // WebKit can expose the previous inherited color while a theme change is
+    // awaiting style resolution. Check the rendered text before axe snapshots it.
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const foreground = getComputedStyle(document.body).color;
+          const elements = document.querySelectorAll(
+            '#holidays .font-medium, button[data-variant="outline"]',
+          );
+          return Array.from(elements).every(
+            (element) => getComputedStyle(element).color === foreground,
+          );
+        }),
+      )
+      .toBe(true);
     const result = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
       .analyze();
