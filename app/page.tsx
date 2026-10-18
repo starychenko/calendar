@@ -1,11 +1,14 @@
+import type { Metadata } from "next";
 import { YearCalendar } from "@/components/calendar/year-calendar";
 import { SEOContent } from "@/components/seo-content";
 import { FloatingHolidays } from "@/components/floating-holidays";
 
-// Static page - dates are determined on client side
-// isToday: client-side in DayCell
-// isCurrentMonth: client-side in MonthCalendar
-// currentYear: client-side in YearCalendar, Footer, SEOContent
+// The layout supplies a request-specific initial date for stable hydration.
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { url: "/" },
+};
 
 export default function Home() {
   return (

@@ -1,35 +1,9 @@
-# Git Workflow
+# Git workflow
 
-## Commit Message Format
-`<emoji> <Ukrainian description>`
+Use a feature/<name> branch for scoped changes. Preserve unrelated working-tree changes. Do not pull, commit, push or deploy automatically: perform only the delivery steps authorized by the user.
 
-### Emoji guide
-- 🐛 — bug fix
-- ✨ — new feature
-- ♻️ — refactor
-- 📝 — documentation
-- 🎨 — UI/style changes
-- ⚡ — performance improvement
-- 🔒 — security fix
-- 🧹 — cleanup / removing dead code
-- 🚀 — deployment / production changes
+Before delivery run npm run lint, npm run typecheck, npm test, npm audit --audit-level=high, npm run build and npm run test:e2e. A local pass does not imply that GitHub CI or production has been verified.
 
-### Examples
-```
-🐛 Виправлено timezone баг у розрахунку Великодня
-✨ Додано підтримку нового типу свят
-📝 Оновлено CLAUDE.md — нові guardrails
-♻️ Рефакторинг FloatingHolidays компоненту
-```
+Use English Conventional Commits: <type>(<scope>): <imperative summary>, at most 72 characters, with no attribution trailers. Stage the reviewed scope explicitly.
 
-## Workflow
-1. `git pull` перед початком роботи
-2. Робимо зміни
-3. `npm run lint && npm run build` — обидва мають пройти
-4. `git add -A && git commit -m "emoji Ukrainian message"`
-5. `git push`
-6. `request_review()` через MCP
-
-## Branch Policy
-- Прямо в `main` для дрібних задач (поточний проект — solo)
-- Feature branch для великих змін: `git checkout -b feature/name`
+Production is managed by Komodo on Contabo. Follow docs/DEPLOYMENT.md when deployment is authorized; preserve the previous image and Compose configuration for rollback.

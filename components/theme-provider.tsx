@@ -7,12 +7,13 @@ export function ThemeProvider() {
   // Локальний стейт для відстеження системної теми (не зберігаємо в Zustand)
   const [systemTheme, setSystemTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") return "light";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   });
 
   // Отримати вибір користувача з Zustand
   const theme = useThemeStore((state) => state.theme);
-  const setTheme = useThemeStore((state) => state.setTheme);
 
   // Обчислити фінальну тему
   const resolvedTheme = theme === "system" ? systemTheme : theme;

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { Calendar, Github, Linkedin, Send } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { useToday } from "@/components/calendar-clock";
 import { useTranslation } from "@/lib/i18n";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  const currentYear = Number(useToday().slice(0, 4));
   const { t } = useTranslation();
 
   return (
@@ -17,7 +18,9 @@ export function Footer() {
           <div className="space-y-4 max-w-md">
             <div className="flex items-center gap-2.5">
               <Calendar className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">{t.common.fiscalCalendar}</span>
+              <span className="font-bold text-lg">
+                {t.common.fiscalCalendar}
+              </span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {t.footer.description}
@@ -87,10 +90,16 @@ export function Footer() {
               {t.footer.copyright.replace("{year}", String(currentYear))}
             </p>
             <div className="flex gap-6 text-sm text-muted-foreground">
-              <Link href="/privacy" className="hover:text-foreground transition-colors">
+              <Link
+                href="/privacy"
+                className="hover:text-foreground transition-colors"
+              >
                 {t.footer.privacy}
               </Link>
-              <Link href="/terms" className="hover:text-foreground transition-colors">
+              <Link
+                href="/terms"
+                className="hover:text-foreground transition-colors"
+              >
                 {t.footer.terms}
               </Link>
             </div>

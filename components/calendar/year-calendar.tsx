@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useCallback, useRef, useEffect } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { getYearMonths } from "@/lib/calendar";
 import { getGfkYearMonths } from "@/lib/gfk-calendar";
+import { useCalendarNavigation } from "@/lib/use-calendar-navigation";
 import { useCalendarStore } from "@/lib/stores/calendar-store";
 import { MonthCalendar } from "./month-calendar";
 import { YearNavigationControls } from "./year-navigation-controls";
@@ -13,24 +14,24 @@ export function YearCalendar() {
   const navigationRef = useRef<HTMLDivElement>(null);
   const { t, locale } = useTranslation();
 
-  // Use selective selectors to prevent unnecessary re-renders
-  const year = useCalendarStore((state) => state.year);
-  const setYear = useCalendarStore((state) => state.setYear);
-  const mode = useCalendarStore((state) => state.mode);
-  const toggleMode = useCalendarStore((state) => state.toggleMode);
-  const setNavigationVisible = useCalendarStore((state) => state.setNavigationVisible);
+  const {
+    year,
+    mode,
+    toggleMode,
+    previousYear: handlePreviousYear,
+    nextYear: handleNextYear,
+    currentYear: handleCurrentYear,
+  } = useCalendarNavigation();
+  const setNavigationVisible = useCalendarStore((s) => s.setNavigationVisible);
 
   const dateFnsLocale = useMemo(() => getDateFnsLocale(locale), [locale]);
 
   // Memoize calendar calculations - expensive operation
   const months = useMemo(() => {
-    return mode === "iso" ? getYearMonths(year, dateFnsLocale) : getGfkYearMonths(year, dateFnsLocale);
+    return mode === "iso"
+      ? getYearMonths(year, dateFnsLocale)
+      : getGfkYearMonths(year, dateFnsLocale);
   }, [year, mode, dateFnsLocale]);
-
-  // Memoize event handlers
-  const handlePreviousYear = useCallback(() => setYear(year - 1), [year, setYear]);
-  const handleNextYear = useCallback(() => setYear(year + 1), [year, setYear]);
-  const handleCurrentYear = useCallback(() => setYear(new Date().getFullYear()), [setYear]);
 
   // Intersection Observer для відстеження видимості navigation
   useEffect(() => {
@@ -45,7 +46,7 @@ export function YearCalendar() {
       {
         threshold: 0, // Одне значення достатньо - коли елемент заходить/виходить
         rootMargin: "-64px 0px 0px 0px", // Компенсуємо висоту header
-      }
+      },
     );
 
     observer.observe(element);

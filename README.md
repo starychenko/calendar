@@ -1,334 +1,71 @@
-# Фіскальний календар України 🇺🇦
-
-Сучасний веб-додаток з календарем, що показує фіскальні тижні за стандартами ISO 8601 та GfK, з усіма українськими святами. Ідеальний інструмент для бізнесу, планування та аналітики.
+# Фіскальний календар України
 
-## Основні можливості
-
-### Календарні методології
-- 📊 **ISO 8601** - міжнародний стандарт (тиждень починається з понеділка, перший тиждень містить четвер)
-- 📈 **GfK Period Mapping** - методологія для роздрібної торгівлі та маркетингу (4-5 тижнів на місяць, патерн 5-4-4 по кварталах)
-- 🔄 Швидке перемикання між режимами одним кліком
+Вебкалендар із номерами ISO-тижнів, фіскальними періодами GfK, вибраними святами України, українською й англійською мовами та світлою/темною темою.
 
-### Свята та події
-- 🇺🇦 **Національні свята** - День Незалежності, Новий рік, День Конституції
-- ⛪ **Релігійні свята** - Великдень (авто-розрахунок за алгоритмом Гауса), Трійця, Різдво
-- 💝 **Міжнародні свята** - 8 Березня, День Валентина, День матері
-- 🛍️ **Комерційні події** - Чорна п'ятниця, Cyber Monday (авто-розрахунок)
+Стек: Next.js 16, React 19, TypeScript, Tailwind CSS 4, Radix UI, Zustand. Потрібен Node.js 24 LTS. Версії залежностей зафіксовані в package-lock.json. Бази даних і бізнесового API немає.
 
-### Зручність використання
-- 🎨 **Кольорове кодування** - кожен тип свята має унікальний градієнтний колір та лінійний індикатор
-- 📱 **Адаптивний дизайн** - ідеально виглядає на телефонах, планшетах та комп'ютерах
-- 🔝 **Scroll-to-top** - кнопка з круговим індикатором прогресу
-- ⏮️⏭️ **Навігація роками** - легкий перехід між роками з дублюванням в header при прокрутці
-- 💡 **Підказки** - наведіть на день зі святом, щоб побачити назву
-- 🌙 **Система тем** - світла, темна або автоматична (слідує за системними налаштуваннями)
-- 📊 **Google Analytics** - відстеження використання (тільки в production)
+## Запуск
 
-### SEO та PWA
-- 🔍 **Повна SEO-оптимізація** - structured data, meta tags, sitemap
-- 📲 **PWA підтримка** - можна встановити як додаток
-- ⚡ **Швидкість** - оптимізований білд з Next.js standalone output
+Використайте Node 24 з .nvmrc, виконайте npm ci, потім npm run dev. Розробка без NEXT_PUBLIC_SITE_URL використовує http://localhost:3000.
 
-## Технології
+Для production скопіюйте .env.example у .env.local і встановіть NEXT_PUBLIC_SITE_URL. Це HTTP(S) origin без шляху, query чи облікових даних. Відсутній або некоректний URL зупиняє production build. NEXT_PUBLIC_GA_ID необовязковий; порожнє значення вимикає Analytics.
 
-- **Next.js 16** з App Router та Turbopack
-- **React 19** з TypeScript
-- **Tailwind CSS v4** для стилізації
-- **shadcn/ui** - сучасні UI компоненти (New York style)
-- **Zustand** з persist middleware - управління станом (календар, теми)
-- **date-fns v4** - робота з датами (locale: uk)
-- **TanStack Query v5** - state management
-- **Lucide React** - іконки
-- **@next/third-parties** - Google Analytics інтеграція
+Команди:
 
-## Запуск локально
+- npm run lint - ESLint для TypeScript/JavaScript і React hooks.
+- npm run typecheck - TypeScript.
+- npm test - весь unit-набір у UTC, Europe/Kyiv, America/Los_Angeles, Pacific/Kiritimati та Australia/Sydney.
+- npm run test:unit - unit-набір у поточному часовому поясі.
+- npm run build - іконки та production standalone-збірка.
+- npx playwright install chromium firefox webkit - браузери для тестів.
+- npm run test:e2e - браузерні сценарії проти standalone-збірки на 127.0.0.1:19118.
+- npm start - запуск standalone із локальними static/public файлами.
+- npm audit --audit-level=high - перевірка залежностей.
 
-```bash
-# Встановити залежності
-npm install
+Для повного E2E-набору збирайте з NEXT_PUBLIC_SITE_URL=http://127.0.0.1:19118 і NEXT_PUBLIC_GA_ID=G-CALENDARTEST. Це дозволяє перевірити як підключення, так і відключення аналітики; тести блокують мережеві запити до Google.
+Для перевірки вже запущеного локального контейнера на цьому ж порту встановіть CALENDAR_E2E_EXTERNAL=1: тести не запускатимуть другий сервер. У CI весь браузерний набір перевіряє Docker-образ під ресурсними обмеженнями з шаблону розгортання.
 
-# Запустити dev server з Turbopack
-npm run dev
+Скрипт dev:clean ніколи не завершує Node-процеси. Він відмовляється працювати, якщо сервер цього проекту активний або власника next-server неможливо визначити. Видалення залишкового .next/dev/lock потребує прапорця --remove-stale-lock після зупинки старого сервера. Звичайний npm run dev залишається основним способом запуску.
 
-# Відкрити http://localhost:3000
-```
+## Правила календаря
 
-## Білд для продакшн
+Домен використовує CalendarDate у форматі YYYY-MM-DD. Це цивільна дата григоріанського календаря, не timestamp. Обчислення та форматування не залежать від часового поясу пристрою. Поточний день після гідрації визначається за локальним часовим поясом браузера; сервер передає узгоджений початковий знімок.
 
-```bash
-# Створити production build
-npm run build
+Підтримуваний діапазон інтерфейсу: 1900-2100. ISO-тиждень починається в понеділок; перший тиждень містить 4 січня.
 
-# Запустити production server
-npm start
+Правило GfK цього проекту, погоджене 18.10.2026: базовий розподіл 5-4-4, 4-5-4, 4-4-5, 5-4-4; рік починається разом з ISO week-year. Якщо між початками двох років 53 тижні, додатковий тиждень належить останньому періоду. Це зафіксована домовленість проекту, а не твердження про універсальний стандарт усіх наборів GfK/NIQ.
 
-# Лінтинг коду
-npm run lint
-```
+Свята - вибраний сучасний набір дат і розрахункові релігійні події. Він не є повним історичним календарем, переліком законодавчих вихідних чи розрахунком робочих норм. Великдень розраховується за юліанською пасхалією з поправкою на століття; Великий піст містить 48 дат.
 
-## Додавання компонентів shadcn/ui
+## Архітектура
 
-```bash
-# Додати новий компонент з бібліотеки shadcn/ui
-npx shadcn@latest add [component-name]
+- lib/date-only.ts - дата, арифметика, форматери та межа між календарем і годинником.
+- lib/calendar.ts, lib/gfk-calendar.ts - чисті функції календарних періодів.
+- lib/holidays.ts - свята й обмежений індекс пошуку за датою.
+- lib/upcoming-holidays.ts - відлік і окремі групи періодів.
+- components/calendar-clock.tsx - єдиний поточний день; перевірка кожні 15 секунд, при focus і visibilitychange.
+- lib/stores, lib/storage.ts - перевірені налаштування та fallback при недоступному сховищі.
+- components/calendar - відображення, сітка з клавіатурною навігацією, підказки.
+- proxy.ts - CSP з окремим nonce на відповідь; next.config.ts - додаткові захисні заголовки.
+- app/opengraph-image.tsx - статичний PNG з локальним ліцензованим шрифтом.
+- tests/unit, tests/e2e - доменні, негативні, UI та маршрутні перевірки.
 
-# Наприклад:
-npx shadcn@latest add dialog
-npx shadcn@latest add select
-```
+HTML формується на запит: поточний день і CSP nonce не можна кешувати на 30 днів. Початковий знімок дати однаковий у SSR та першому клієнтському render; після гідрації годинник переходить на дату браузера. Явно обраний рік не змінюється о півночі; кнопка "Сьогодні" повертає автоматичний поточний рік.
 
-## SEO та PWA
+LocalStorage: fiscal-calendar-mode, fiscal-calendar-lang, fiscal-calendar-theme, holidays-panel-state, holidays-panel-hint-shown. Невідомі значення і недоступне сховище не повинні ламати сторінку. Тіло сторінки не приховується в очікуванні JS.
 
-Проект включає повну підтримку SEO та PWA:
+## Доступність і дані
 
-### Автоматично генеровані файли:
-- ✅ **Favicon** (`app/icon.svg`) - SVG іконка календаря
-- ✅ **robots.txt** (`app/robots.ts`) - правила для пошукових роботів
-- ✅ **sitemap.xml** (`app/sitemap.ts`) - карта сайту з усіма сторінками (/, /privacy, /terms)
-- ✅ **manifest.json** (`app/manifest.ts`) - PWA manifest
-- ✅ **Open Graph image** (`app/opengraph-image.tsx`) - динамічне зображення з роком для соціальних мереж
-- ✅ **Viewport** (`app/viewport.ts`) - налаштування viewport з theme colors
+Кожен місяць має один Tab-вхід. Стрілки змінюють день, Home/End переходять у межах рядка, Enter/Space відкривають свято, Escape закриває підказку. Мобільна панель має назву й повернення фокуса. Приховані контролі виключені з навігації.
 
-### Генерація PWA іконок:
-```bash
-# Автоматично згенерувати icon-192.png та icon-512.png з app/icon.svg
-npm run generate:icons
-```
+Google Analytics запускається лише в production за наявності ID і без Do Not Track/Global Privacy Control. Юридичні сторінки залишаються українськими та мають власний lang і canonical. Непідтверджених aggregateRating у HTML немає.
 
-Іконки автоматично створюються в `public/`. Для зміни дизайну відредагуйте `app/icon.svg` та запустіть команду знову.
+Manifest та іконки доступні для браузерів, що підтримують встановлення. Service worker і офлайн-режим не реалізовані.
 
-### Конфігурація для production:
-Створіть `.env.local` або встановіть змінні середовища:
+## Доставка
 
-```env
-# Обов'язково для правильної роботи SEO
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
+Production працює в Komodo на Contabo: стек calendar, /opt/stacks/calendar, контейнер calendar-app. Докладний процес, ресурсні межі та відкат: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-# Опціонально - для Google Analytics (тільки в production)
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
-```
+NEXT_PUBLIC_* вбудовуються під час build. Передача нового значення лише через docker run -e не змінює вже зібраний браузерний код. Dockerfile приймає build arguments; реліз має мати незмінний тег або digest.
 
-## Деплой через Coolify
-
-### 1. Підготовка репозиторію
-
-Створіть git репозиторій та запуште код:
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin YOUR_REPO_URL
-git push -u origin main
-```
-
-### 2. Налаштування в Coolify
-
-1. **Створіть новий проект** в Coolify Dashboard
-2. **Підключіть Git репозиторій**
-3. **Виберіть Build Pack**: Dockerfile
-4. **Налаштування**:
-   - Build Context: `/`
-   - Dockerfile Location: `./Dockerfile`
-   - Port: `3000`
-
-### 3. Environment Variables
-
-**Обов'язкові змінні для production:**
-
-В Coolify Dashboard → Settings → Environment Variables додайте:
-
-```env
-# Production URL для SEO (sitemap, robots.txt, Open Graph)
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
-
-# Google Analytics Measurement ID (опціонально)
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
-
-# Node environment (автоматично встановлюється)
-NODE_ENV=production
-```
-
-**Примітка:**
-- Без `NEXT_PUBLIC_SITE_URL` буде використано `http://localhost:3000` як fallback
-- Без `NEXT_PUBLIC_GA_ID` Analytics не буде завантажуватись
-
-### 4. Деплой
-
-Натисніть **Deploy** і Coolify автоматично:
-- Склонує репозиторій
-- Встановить залежності (включаючи sharp для генерації іконок)
-- Згенерує PWA іконки з `app/icon.svg`
-- Збудує Next.js з standalone output
-- Створить оптимізований Docker image
-- Запустить контейнер на порту 3000
-- Налаштує домен
-
-### 5. Після деплою
-
-Переконайтеся, що:
-- ✅ Сайт доступний за вашим доменом
-- ✅ PWA іконки завантажуються (`/icon-192.png`, `/icon-512.png`)
-- ✅ Manifest доступний (`/manifest.webmanifest`)
-- ✅ Sitemap генерується (`/sitemap.xml`)
-- ✅ Robots.txt доступний (`/robots.txt`)
-- ✅ Open Graph зображення генерується (`/opengraph-image`)
-
-## Тестування Docker білду локально
-
-Перед деплоєм на Coolify, рекомендується протестувати білд локально:
-
-```bash
-# Збудувати Docker image
-docker build -t calendar-app .
-
-# Запустити контейнер
-docker run -p 3000:3000 -e NEXT_PUBLIC_SITE_URL=http://localhost:3000 calendar-app
-
-# Перевірити в браузері
-# http://localhost:3000
-```
-
-**Перевірте:**
-- [ ] Білд проходить без помилок
-- [ ] PWA іконки генеруються (`/icon-192.png`, `/icon-512.png`)
-- [ ] Календар відображається правильно
-- [ ] Toggle між ISO та GfK працює
-- [ ] Свята відображаються
-
-## Dockerfile
-
-Проект використовує multi-stage Dockerfile для оптимізації:
-- Stage 1: Встановлення залежностей
-- Stage 2: Білд Next.js з standalone output (включає генерацію іконок)
-- Stage 3: Production image з мінімальним розміром
-
-## Структура проекту
-
-```
-calendar/
-├── app/                                # Next.js App Router
-│   ├── layout.tsx                     # Головний layout з SEO, structured data, Analytics
-│   ├── page.tsx                       # Головна сторінка
-│   ├── providers.tsx                  # TanStack Query + ThemeProvider
-│   ├── globals.css                    # Tailwind CSS v4
-│   ├── icon.svg                       # SVG іконка (favicon)
-│   ├── opengraph-image.tsx            # Динамічне OG зображення з роком
-│   ├── manifest.ts                    # PWA manifest
-│   ├── viewport.ts                    # Viewport + theme colors
-│   ├── robots.ts                      # Правила для пошукових ботів
-│   ├── sitemap.ts                     # XML sitemap
-│   ├── privacy/page.tsx               # Privacy Policy
-│   └── terms/page.tsx                 # Terms of Service
-│
-├── components/
-│   ├── calendar/                      # Компоненти календаря
-│   │   ├── year-calendar.tsx         # Головний компонент з IntersectionObserver
-│   │   ├── year-navigation-controls.tsx  # Навігація з Analytics tracking
-│   │   ├── month-calendar.tsx        # Карточка місяця
-│   │   ├── week-row.tsx              # Рядок тижня
-│   │   └── day-cell.tsx              # Клітинка дня з Tooltip
-│   │
-│   ├── layout/                        # Layout компоненти
-│   │   ├── header.tsx                # Header з динамічною навігацією
-│   │   └── footer.tsx                # Footer з посиланнями
-│   │
-│   ├── ui/                            # shadcn/ui компоненти (New York)
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   ├── badge.tsx
-│   │   ├── tooltip.tsx
-│   │   ├── accordion.tsx
-│   │   ├── dropdown-menu.tsx
-│   │   ├── switch.tsx
-│   │   └── label.tsx
-│   │
-│   ├── analytics.tsx                  # Google Analytics wrapper
-│   ├── theme-provider.tsx             # Система тем з matchMedia
-│   ├── theme-toggle.tsx               # Dropdown menu перемикач
-│   ├── seo-content.tsx                # SEO-контент з FAQ
-│   └── scroll-to-top.tsx              # Кнопка з круговим прогресом
-│
-├── lib/
-│   ├── stores/                        # Zustand з persist
-│   │   ├── calendar-store.ts         # mode, year, navigationVisible
-│   │   └── theme-store.ts            # theme preference
-│   │
-│   ├── constants/
-│   │   └── holiday-styles.ts         # Градієнти та індикатори свят
-│   │
-│   ├── utils.ts                      # cn() утиліта
-│   ├── calendar.ts                   # ISO 8601 логіка
-│   ├── gfk-calendar.ts               # GfK Period Mapping
-│   ├── holidays.ts                   # Обчислення свят (Gauss algorithm)
-│   ├── analytics.ts                  # Type-safe event tracking
-│   └── env.ts                        # Environment variables validation
-│
-├── public/                            # Статичні файли
-│   ├── icon-192.png                  # PWA іконка (auto-generated)
-│   └── icon-512.png                  # PWA іконка (auto-generated)
-│
-├── scripts/
-│   └── generate-icons.mjs            # PWA icons generator (Sharp)
-│
-├── Dockerfile                         # Multi-stage Docker build
-├── components.json                    # shadcn/ui config (New York)
-├── next.config.ts                     # standalone output
-└── tailwind.config.ts                 # Tailwind CSS v4
-```
-
-## Методології обліку тижнів
-
-### ISO 8601 (за замовчуванням)
-Міжнародний стандарт для нумерації тижнів:
-- Тиждень починається з понеділка
-- Перший тиждень року містить перший четвер року
-- Кожен тиждень належить до року, в якому більшість його днів
-- Нумерація: 1-52 (іноді 53)
-
-### GfK Period Mapping
-Методологія для маркетингових досліджень та роздрібної торгівлі:
-- Місяці мають фіксовану кількість тижнів: **4 або 5**
-- Розподіл по кварталах: **5-4-4, 4-5-4, 4-4-5**
-- Зручно для порівняння продажів та аналітики
-- Використовується компаніями GfK, Nielsen та іншими
-
-**Приклад розподілу на 2024 рік:**
-- Q1: Січень (5т), Лютий (4т), Березень (4т)
-- Q2: Квітень (4т), Травень (5т), Червень (4т)
-- Q3: Липень (4т), Серпень (4т), Вересень (5т)
-- Q4: Жовтень (5т), Листопад (4т), Грудень (4т)
-
-## Свята
-
-### Національні свята України
-- Новий рік (1 січня)
-- День праці (1 травня)
-- День пам'яті та перемоги над нацизмом у Другій світовій війні (8 травня)
-- День Конституції України (28 червня)
-- День Української Державності (15 липня)
-- День незалежності України (24 серпня)
-- День захисників і захисниць України (1 жовтня)
-
-### Релігійні свята
-- Великдень (плаваюча дата)
-- Трійця (плаваюча дата)
-- Різдво Христове (25 грудня)
-
-### Міжнародні свята
-- День Святого Валентина (14 лютого)
-- Міжнародний жіночий день (8 березня)
-
-### Комерційні свята
-- Чорна п'ятниця (день після 4-го четверга листопада - День подяки в США)
-- Кіберпонеділок (через 3 дні після Чорної п'ятниці)
-
-### Обчислення плаваючих дат
-- **Великдень** — розраховується за алгоритмом Гауса
-- **Трійця** — 49 днів після Великодня
-- **Чорна п'ятниця** — автоматично визначається для кожного року
-- **Кіберпонеділок** — автоматично визначається на основі Чорної п'ятниці
-
-## Ліцензія
-
-Цей проект ліцензовано під **Apache License 2.0**. Дивіться [LICENSE](LICENSE) для детальної інформації.
+GitHub workflow перевіряє код і контейнер в ізольованому hosted runner; не має production-секретів і не виконує деплой. Сам факт наявності workflow не означає, що перевірка в GitHub уже пройшла.

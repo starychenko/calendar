@@ -54,7 +54,8 @@ export const en: TranslationStrings = {
   },
 
   footer: {
-    description: "Calendar with fiscal weeks by ISO 8601 and GFK standards — an essential tool for business in Ukraine.",
+    description:
+      "Calendar with fiscal weeks by ISO 8601 and GFK standards — an essential tool for business in Ukraine.",
     contacts: "Contacts",
     copyright: "© {year} Fiscal Calendar Ukraine. All rights reserved.",
     privacy: "Privacy",
@@ -69,27 +70,50 @@ export const en: TranslationStrings = {
   },
 
   seo: {
-    holidaysTitle: "State and professional holidays in {year}",
+    holidaysTitle: "State and selected holidays in {year}",
     faqTitle: "Frequently Asked Questions",
     faqIsoQ: "How is the week number determined by ISO 8601?",
-    faqIsoA: "According to ISO 8601, the week starts on Monday. The first week of the year is the week that contains the first Thursday of January. This means that the first week always has at least 4 days in the new year. This approach ensures that each year has a full 52 or 53 weeks.",
+    faqIsoA:
+      "According to ISO 8601, the week starts on Monday. The first week of the year is the week that contains the first Thursday of January. This means that the first week always has at least 4 days in the new year. This approach ensures that each year has a full 52 or 53 weeks.",
     faqGfkQ: "What is the GFK calendar used for?",
-    faqGfkA: "The GFK calendar is used in retail and marketing analytics to compare sales across different years. It allows correct comparison of weekly metrics, taking into account the number of days in a month and their distribution. This is especially important for planning promotions, advertising campaigns, and demand forecasting.",
+    faqGfkA:
+      "In this project, GfK mode groups complete weeks into fiscal periods using the 5-4-4-4-5-4-4-4-5-5-4-4 pattern. If the ISO year has 53 weeks, the extra week belongs to the final period. This is the project's agreed convention; verify it against your organization's calendar before using it for external reporting.",
     faqHolidaysQ: "What holidays are included in the calendar?",
-    faqHolidaysA: "The calendar includes all official state holidays of Ukraine, the full Orthodox calendar (31+ holidays, including Twelve Great Feasts, Easter, Pentecost, Ivan Kupala, Saviour and others), international holidays, and commercial events. Great Lent is marked separately as a 48-day period. In total, over 70 important dates for planning throughout the year. Each type of holiday is marked with its own color for convenience.",
+    faqHolidaysA:
+      "The calendar includes selected Ukrainian national, religious and international holidays, plus Black Friday and Cyber Monday. Great Lent is displayed as a separate period. This is not a complete historical reference and does not determine statutory days off or working-time quotas.",
     faqEasterQ: "Why does Easter fall on different dates each year?",
-    faqEasterA: "Easter is a movable feast, the date of which is calculated using a complex algorithm (Gauss's formula). Orthodox Easter is celebrated on the first Sunday after the first spring full moon following the vernal equinox. Because of this, the date can vary from April 4 to May 8. Other religious holidays depend on the date of Easter, for example Pentecost (49 days after Easter).",
+    faqEasterA:
+      "Orthodox Easter is calculated using the Julian computus and converted to a Gregorian date. Pentecost follows 49 days later, and Great Lent is derived from Easter. The algorithm is tested over the supported 1900-2100 range, including the change in the offset between the calendars in 2100.",
     faqAutoQ: "Is the calendar updated automatically?",
-    faqAutoA: "Yes, the calendar automatically calculates all dates and holidays for the current year. Movable feasts (such as Easter, Pentecost) are calculated dynamically using the appropriate algorithms. This ensures that you always have up-to-date information regardless of the year.",
+    faqAutoA:
+      "Changing the year recalculates the dates of the holidays included in this calendar. The current day updates automatically. Holiday names and the list itself are maintained in code; legislative and church-calendar changes require a separate update.",
     faqOrthodoxQ: "What Orthodox holidays are included in the calendar?",
-    faqOrthodoxIntro: "The calendar includes the full Orthodox calendar of Ukraine:",
+    faqOrthodoxIntro:
+      "The calendar includes selected Orthodox holidays and periods:",
     faqOrthodoxCategories: [
-      { title: "Twelve Great Feasts:", items: "Epiphany, Candlemas, Annunciation, Ascension, Pentecost, Transfiguration (Apple Saviour), Dormition, Nativity of the Mother of God, Exaltation of the Cross, Presentation of Mary" },
+      {
+        title: "Twelve Great Feasts:",
+        items:
+          "Epiphany, Candlemas, Annunciation, Ascension, Pentecost, Transfiguration (Apple Saviour), Dormition, Nativity of the Mother of God, Exaltation of the Cross, Presentation of Mary",
+      },
       { title: "Great Feasts:", items: "Easter (Pascha), Christmas" },
-      { title: "Saints' Days:", items: "Saint George, Saints Peter and Paul, Saint Nicholas" },
-      { title: "Folk Religious Holidays:", items: "Ivan Kupala, Generous Evening (Malanka)" },
-      { title: "Movable Feasts:", items: "Forgiveness Sunday, Palm Sunday, Easter, Ascension, Pentecost (calculated automatically by the church calendar)" },
-      { title: "Great Lent:", items: "48-day period before Easter, marked separately" },
+      {
+        title: "Saints' Days:",
+        items: "Saint George, Saints Peter and Paul, Saint Nicholas",
+      },
+      {
+        title: "Folk Religious Holidays:",
+        items: "Ivan Kupala, Generous Evening (Malanka)",
+      },
+      {
+        title: "Movable Feasts:",
+        items:
+          "Forgiveness Sunday, Palm Sunday, Easter, Ascension, Pentecost (calculated automatically by the church calendar)",
+      },
+      {
+        title: "Great Lent:",
+        items: "48-day period before Easter, marked separately",
+      },
     ],
   },
 

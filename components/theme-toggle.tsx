@@ -14,7 +14,6 @@ import { useTranslation } from "@/lib/i18n";
 
 export function ThemeToggle() {
   // Use selective selectors to prevent unnecessary re-renders
-  const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
   const { t } = useTranslation();
 

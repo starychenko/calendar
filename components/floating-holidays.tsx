@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect, useMemo, memo } from "react";
-import { Calendar, ChevronRight, ChevronLeft, X } from "lucide-react";
+import { Calendar, ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
@@ -29,7 +28,9 @@ import {
 
 // Zustand store для збереження стану панелі
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { safeStorage, storedField } from "@/lib/storage";
+import { useToday } from "@/components/calendar-clock";
 
 interface HolidaysPanelStore {
   isOpen: boolean;
@@ -44,8 +45,15 @@ const useHolidaysPanelStore = create<HolidaysPanelStore>()(
     }),
     {
       name: "holidays-panel-state",
-    }
-  )
+      storage: createJSONStorage(() => safeStorage),
+      skipHydration: true,
+      partialize: (state) => ({ isOpen: state.isOpen }),
+      merge: (persisted, current) => ({
+        ...current,
+        isOpen: storedField(persisted, "isOpen") === true,
+      }),
+    },
+  ),
 );
 
 /**
@@ -54,7 +62,7 @@ const useHolidaysPanelStore = create<HolidaysPanelStore>()(
  */
 function debounce<T extends (...args: never[]) => unknown>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
   return (...args: Parameters<T>) => {
@@ -63,32 +71,16 @@ function debounce<T extends (...args: never[]) => unknown>(
   };
 }
 
-/**
- * Отримати поточну дату без часу (для порівняння)
- */
-function getCurrentDateKey(): string {
-  const today = new Date();
-  return `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-}
-
 export function FloatingHolidays() {
   const { isOpen, setIsOpen } = useHolidaysPanelStore();
   const [isMobile, setIsMobile] = useState(false);
-  const [currentDateKey, setCurrentDateKey] = useState(getCurrentDateKey);
+  const today = useToday();
   const [showHint, setShowHint] = useState(false);
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
 
-  // Оновлюємо дату кожну хвилину для автоматичного оновлення свят о півночі
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newDateKey = getCurrentDateKey();
-      if (newDateKey !== currentDateKey) {
-        setCurrentDateKey(newDateKey);
-      }
-    }, 60000); // Перевірка кожну хвилину
-
-    return () => clearInterval(interval);
-  }, [currentDateKey]);
+    void useHolidaysPanelStore.persist.rehydrate();
+  }, []);
 
   // Мемоізована debounce функція для resize обробника
   const debouncedCheckMobile = useMemo(
@@ -96,7 +88,7 @@ export function FloatingHolidays() {
       debounce(() => {
         setIsMobile(window.innerWidth < 1024);
       }, 150),
-    []
+    [],
   );
 
   // Визначаємо мобільний пристрій з debounce
@@ -116,10 +108,12 @@ export function FloatingHolidays() {
   // Показуємо підказку при першому візиті (тільки на десктопах коли панель закрита)
   useEffect(() => {
     // Перевіряємо, чи вже показували підказку
-    const hintShown = localStorage.getItem("holidays-panel-hint-shown");
+    const hintShown = safeStorage.getItem("holidays-panel-hint-shown");
 
     // Перевіряємо налаштування accessibility (зменшення руху)
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     let showTimer: NodeJS.Timeout | undefined;
     let hideTimer: NodeJS.Timeout | undefined;
@@ -132,7 +126,7 @@ export function FloatingHolidays() {
         // Приховуємо підказку через 3 секунди
         hideTimer = setTimeout(() => {
           setShowHint(false);
-          localStorage.setItem("holidays-panel-hint-shown", "true");
+          safeStorage.setItem("holidays-panel-hint-shown", "true");
         }, 3000);
       }, 2000);
     }
@@ -143,17 +137,16 @@ export function FloatingHolidays() {
     };
   }, [isMobile, isOpen]);
 
-  // Мемоізація з залежністю від дати для автоматичного оновлення
-  // currentDateKey використовується як cache-buster для перерахунку при зміні дати
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const todayHolidays = useMemo(() => getTodayHolidays(), [currentDateKey]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const upcomingHolidays = useMemo(() => getUpcomingHolidays(60), [currentDateKey]);
+  const todayHolidays = useMemo(() => getTodayHolidays(today), [today]);
+  const upcomingHolidays = useMemo(
+    () => getUpcomingHolidays(60, today),
+    [today],
+  );
 
   const handleToggle = () => {
     // Завжди встановлюємо маркер при будь-якій взаємодії користувача
     // Це запобігає показу анімації навіть якщо користувач клікнув до її запуску
-    localStorage.setItem("holidays-panel-hint-shown", "true");
+    safeStorage.setItem("holidays-panel-hint-shown", "true");
 
     setIsOpen(!isOpen);
 
@@ -182,7 +175,7 @@ export function FloatingHolidays() {
               "hover:scale-105 hover:border-slate-400 dark:hover:border-border/80",
               "active:scale-95",
               "backdrop-blur-sm",
-              isOpen && "scale-0 opacity-0 pointer-events-none"
+              isOpen && "scale-0 opacity-0 pointer-events-none",
             )}
             aria-label={t.holidays.openList}
           >
@@ -202,7 +195,7 @@ export function FloatingHolidays() {
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom",
             "data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
-            "duration-300"
+            "duration-300",
           )}
         >
           <HolidayPanelContent
@@ -234,7 +227,7 @@ export function FloatingHolidays() {
           "hover:text-slate-900 dark:hover:text-accent-foreground",
           "group",
           // Анімація підказки - язичок підстрибує вправо як м'ячик
-          showHint && "animate-bounce-hint"
+          showHint && "animate-bounce-hint",
         )}
         aria-label={isOpen ? t.holidays.closePanel : t.holidays.openPanel}
       >
@@ -254,6 +247,8 @@ export function FloatingHolidays() {
 
       {/* Десктопна панель */}
       <div
+        inert={!isOpen}
+        aria-hidden={!isOpen}
         className={cn(
           "fixed top-16 left-0 h-[calc(100vh-4rem)] z-30",
           "w-90",
@@ -262,7 +257,7 @@ export function FloatingHolidays() {
           "shadow-2xl dark:shadow-black/50",
           "flex flex-col",
           "transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <HolidayPanelContent
@@ -278,18 +273,17 @@ export function FloatingHolidays() {
 interface HolidayPanelContentProps {
   todayHolidays: HolidayGroup[];
   upcomingHolidays: HolidayGroup[];
-  onClose?: () => void;
   isDesktop?: boolean;
 }
 
 function HolidayPanelContent({
   todayHolidays,
   upcomingHolidays,
-  onClose,
   isDesktop,
 }: HolidayPanelContentProps) {
   const { t, locale } = useTranslation();
   const dateFnsLocale = useMemo(() => getDateFnsLocale(locale), [locale]);
+  const today = useToday();
 
   return (
     <>
@@ -297,31 +291,33 @@ function HolidayPanelContent({
         <div className="px-6 py-4 border-b border-slate-200 dark:border-border">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-foreground">
+              <SheetTitle className="text-lg font-bold text-foreground">
                 {t.holidays.holidaysOfUkraine}
-              </h2>
-              <p className="text-sm text-muted-foreground">
+              </SheetTitle>
+              <SheetDescription className="text-sm text-muted-foreground">
                 {t.holidays.currentAndUpcoming}
-              </p>
+              </SheetDescription>
             </div>
           </div>
         </div>
       )}
 
-      <div className={cn(
-        "flex-1 overflow-y-auto px-6 space-y-6",
-        isDesktop ? "py-6" : "py-4"
-      )}>
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto px-6 space-y-6",
+          isDesktop ? "py-6" : "py-4",
+        )}
+      >
         {/* Свята сьогодні */}
         {todayHolidays.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-              {t.time.today} • {formatShortDate(new Date(), dateFnsLocale)}
+              {t.time.today} • {formatShortDate(today, dateFnsLocale)}
             </h3>
             <div className="space-y-2">
               {todayHolidays.map((holiday) => (
                 <HolidayCard
-                  key={`today-${holiday.name}-${holiday.date?.getTime()}`}
+                  key={`today-${holiday.name}-${holiday.isPeriod ? holiday.startDate : holiday.date}`}
                   holiday={holiday}
                   isToday
                 />
@@ -340,9 +336,7 @@ function HolidayPanelContent({
               {upcomingHolidays.map((holiday) => (
                 <HolidayCard
                   key={`upcoming-${holiday.name}-${
-                    holiday.isPeriod
-                      ? holiday.startDate?.getTime()
-                      : holiday.date?.getTime()
+                    holiday.isPeriod ? holiday.startDate : holiday.date
                   }`}
                   holiday={holiday}
                 />
@@ -372,30 +366,28 @@ const HolidayCard = memo(function HolidayCard({
   const { t, locale } = useTranslation();
   const dateFnsLocale = useMemo(() => getDateFnsLocale(locale), [locale]);
 
+  const today = useToday();
   const holidayName = getHolidayName(holiday, locale);
 
   // Мемоізація розрахунків днів до свята
   const { daysUntilText, dateText } = useMemo(() => {
-    const holidayDate = holiday.isPeriod ? holiday.startDate! : holiday.date!;
-    const daysUntil = getDaysUntilHoliday(holidayDate);
+    const holidayDate = holiday.isPeriod ? holiday.startDate : holiday.date;
+    const daysUntil = getDaysUntilHoliday(holidayDate, today);
 
-    const dateText =
-      holiday.isPeriod && holiday.startDate && holiday.endDate && holiday.daysCount
-        ? formatPeriodLocalized(
-            formatShortDate(holiday.startDate, dateFnsLocale),
-            formatShortDate(holiday.endDate, dateFnsLocale),
-            holiday.daysCount,
-            locale
-          )
-        : holiday.date
-        ? formatShortDate(holiday.date, dateFnsLocale)
-        : "";
+    const dateText = holiday.isPeriod
+      ? formatPeriodLocalized(
+          formatShortDate(holiday.startDate, dateFnsLocale),
+          formatShortDate(holiday.endDate, dateFnsLocale),
+          holiday.daysCount,
+          locale,
+        )
+      : formatShortDate(holiday.date, dateFnsLocale);
 
     return {
       daysUntilText: formatDaysUntilLocalized(daysUntil, locale, t),
       dateText,
     };
-  }, [holiday, dateFnsLocale, locale, t]);
+  }, [holiday, dateFnsLocale, locale, t, today]);
 
   return (
     <div
@@ -403,7 +395,7 @@ const HolidayCard = memo(function HolidayCard({
         "p-3 rounded-lg border",
         bgStyle,
         isToday && "ring-2 ring-blue-500 dark:ring-blue-400",
-        "hover:shadow-md transition-shadow duration-200"
+        "hover:shadow-md transition-shadow duration-200",
       )}
     >
       <div className="flex items-start gap-3">

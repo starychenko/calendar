@@ -120,10 +120,7 @@ body {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Hide body until React hydrates when client state differs from SSR defaults (locale≠uk, mode≠iso) */
-html.needs-hydration body {
-  visibility: hidden;
-}
+
 
 @layer base {
   * {
@@ -236,4 +233,7 @@ html.needs-hydration body {
 .animate-bounce-hint {
   animation: bounce-hint 1.5s ease-in-out infinite;
   transform-origin: left center;  /* Розтягування від лівого краю (язичок залишається притиснутим до екрану) */
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }

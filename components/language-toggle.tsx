@@ -24,21 +24,31 @@ export function LanguageToggle() {
         "flex items-center gap-0.5 h-9 px-2 rounded-md",
         "text-sm font-medium",
         "hover:bg-accent hover:text-accent-foreground",
-        "transition-colors cursor-pointer"
+        "transition-colors cursor-pointer",
       )}
-      aria-label={locale === "uk" ? "Switch to English" : "Перемкнути на українську"}
+      aria-label={
+        locale === "uk" ? "Switch to English" : "Перемкнути на українську"
+      }
     >
-      <span className={cn(
-        "transition-colors",
-        locale === "uk" ? "text-foreground font-semibold" : "text-muted-foreground"
-      )}>
+      <span
+        className={cn(
+          "transition-colors",
+          locale === "uk"
+            ? "text-foreground font-semibold"
+            : "text-foreground/80",
+        )}
+      >
         UA
       </span>
-      <span className="text-muted-foreground/50">/</span>
-      <span className={cn(
-        "transition-colors",
-        locale === "en" ? "text-foreground font-semibold" : "text-muted-foreground"
-      )}>
+      <span className="text-foreground/80">/</span>
+      <span
+        className={cn(
+          "transition-colors",
+          locale === "en"
+            ? "text-foreground font-semibold"
+            : "text-foreground/80",
+        )}
+      >
         EN
       </span>
     </button>

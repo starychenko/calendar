@@ -17,12 +17,17 @@ export function ScrollToTop() {
     const visible = scrollY > 300;
 
     // Обчислити прогрес прокрутки
-    const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const windowHeight =
+      document.documentElement.scrollHeight -
+      document.documentElement.clientHeight;
     const scrolled = windowHeight > 0 ? (scrollY / windowHeight) * 100 : 0;
     const progress = Math.min(Math.max(scrolled, 0), 100);
 
     // Оновлювати стан тільки якщо значення змінились (уникаємо зайвих рендерів)
-    if (Math.abs(lastScrollY.current - scrollY) > 10 || (visible && Math.abs(lastProgress.current - progress) > 0.5)) {
+    if (
+      Math.abs(lastScrollY.current - scrollY) > 10 ||
+      (visible && Math.abs(lastProgress.current - progress) > 0.5)
+    ) {
       lastScrollY.current = scrollY;
       lastProgress.current = progress;
       setIsVisible(visible);
@@ -60,7 +65,9 @@ export function ScrollToTop() {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
     });
   };
 
@@ -73,6 +80,9 @@ export function ScrollToTop() {
   return (
     <button
       onClick={scrollToTop}
+      tabIndex={isVisible ? 0 : -1}
+      aria-hidden={!isVisible}
+      disabled={!isVisible}
       aria-label={t.common.scrollToTop}
       className={`fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-[opacity,transform,shadow] duration-300 hover:scale-110 flex items-center justify-center ${
         isVisible
@@ -80,39 +90,39 @@ export function ScrollToTop() {
           : "opacity-0 translate-y-10 pointer-events-none [will-change:auto]"
       }`}
     >
-        {/* Круговий прогрес індикатор */}
-        <svg
-          className="absolute inset-0 w-full h-full -rotate-90"
-          viewBox="0 0 48 48"
-        >
-          {/* Фоновий круг */}
-          <circle
-            cx="24"
-            cy="24"
-            r={radius}
-            stroke="currentColor"
-            strokeWidth="3"
-            fill="none"
-            className="opacity-20"
-          />
-          {/* Прогрес круг */}
-          <circle
-            cx="24"
-            cy="24"
-            r={radius}
-            stroke="currentColor"
-            strokeWidth="3"
-            fill="none"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            className="text-primary-foreground"
-            style={{ transition: 'none' }}
-          />
-        </svg>
+      {/* Круговий прогрес індикатор */}
+      <svg
+        className="absolute inset-0 w-full h-full -rotate-90"
+        viewBox="0 0 48 48"
+      >
+        {/* Фоновий круг */}
+        <circle
+          cx="24"
+          cy="24"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="3"
+          fill="none"
+          className="opacity-20"
+        />
+        {/* Прогрес круг */}
+        <circle
+          cx="24"
+          cy="24"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="3"
+          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="text-primary-foreground"
+          style={{ transition: "none" }}
+        />
+      </svg>
 
-        {/* Іконка стрілки */}
-        <ArrowUp className="h-5 w-5 relative z-10" />
+      {/* Іконка стрілки */}
+      <ArrowUp className="h-5 w-5 relative z-10" />
     </button>
   );
 }

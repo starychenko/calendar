@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import sharp from "sharp";
@@ -38,7 +38,9 @@ async function generateIcons() {
     }
 
     console.log("\n🎉 Всі іконки успішно згенеровані!");
-    console.log("\n📱 Ваш додаток тепер готовий до інсталяції як PWA!");
+    console.log(
+      "\nІконки для manifest згенеровано. Офлайн-режим не реалізовано.",
+    );
   } catch (error) {
     console.error("❌ Помилка при генерації іконок:", error.message);
     process.exit(1);

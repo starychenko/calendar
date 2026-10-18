@@ -1,35 +1,33 @@
 "use client";
-
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
+import { CalendarClock } from "@/components/calendar-clock";
+import type { CalendarDate } from "@/lib/date-only";
 import { useLanguageStore } from "@/lib/stores/language-store";
 import { useCalendarStore } from "@/lib/stores/calendar-store";
+import { useThemeStore } from "@/lib/stores/theme-store";
 
-export function Providers({ children }: { children: React.ReactNode }) {
-  useLayoutEffect(() => {
-    // Sync client state from inline script globals before browser paint
-    const initialLocale = window.__FISCAL_LOCALE__;
-    if (initialLocale && initialLocale !== useLanguageStore.getState().locale) {
-      useLanguageStore.setState({ locale: initialLocale });
-    }
-
-    const initialMode = window.__FISCAL_MODE__;
-    if (initialMode && initialMode !== useCalendarStore.getState().mode) {
-      useCalendarStore.setState({ mode: initialMode });
-    }
-
-    // Rehydrate persist middleware for future persistence
-    useLanguageStore.persist.rehydrate();
-    useCalendarStore.persist.rehydrate();
-
-    // Reveal body now that state is correct
-    document.documentElement.classList.remove("needs-hydration");
+export function Providers({
+  initialToday,
+  children,
+}: {
+  initialToday: CalendarDate;
+  children: React.ReactNode;
+}) {
+  const locale = useLanguageStore((s) => s.locale);
+  useEffect(() => {
+    void useLanguageStore.persist.rehydrate();
+    void useCalendarStore.persist.rehydrate();
+    void useThemeStore.persist.rehydrate();
+    document.documentElement.dataset.appReady = "true";
   }, []);
-
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
   return (
-    <>
+    <CalendarClock initialToday={initialToday}>
       <ThemeProvider />
       {children}
-    </>
+    </CalendarClock>
   );
 }

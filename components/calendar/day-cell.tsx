@@ -1,187 +1,105 @@
 "use client";
-
-import { memo, useMemo, useState, useEffect } from "react";
-import { isSameDay } from "date-fns";
-import { cn } from "@/lib/utils";
-import { CalendarDay } from "@/lib/calendar";
+import { memo, useState } from "react";
+import type { CalendarDay } from "@/lib/calendar";
 import { getHolidaysForDate } from "@/lib/holidays";
-import { HOLIDAY_STYLES, HOLIDAY_INDICATORS } from "@/lib/constants/holiday-styles";
-import { useTranslation, getHolidayName } from "@/lib/i18n";
+import { formatCalendarDate, type CalendarDate } from "@/lib/date-only";
+import type { Locale } from "@/lib/stores/language-store";
+import {
+  HOLIDAY_STYLES,
+  HOLIDAY_INDICATORS,
+} from "@/lib/constants/holiday-styles";
+import { getHolidayName } from "@/lib/i18n";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
-interface DayCellProps {
+interface Props {
   day: CalendarDay;
-  isLast?: boolean;
   mode: "iso" | "gfk";
+  isLast?: boolean;
+  today: CalendarDate;
+  locale: Locale;
+  todaySuffix: string;
+  tabIndex: number;
 }
-
-const DayCellComponent = ({ day, isLast, mode }: DayCellProps) => {
-  // State for controlled tooltip (needed for mobile touch support)
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  const { t, locale } = useTranslation();
-
-  // Client-side check for current day (avoids build-time static value)
-  const isToday = useMemo(() => isSameDay(day.date, new Date()), [day.date]);
-
-  // Memoize expensive holiday lookup - returns array of all holidays
-  const holidays = useMemo(() => getHolidaysForDate(day.date), [day.date]);
-  const isHoliday = holidays.length > 0;
-
-  // First holiday has highest priority (used for styling and indicator)
-  const primaryHoliday = holidays[0];
-
-  // Memoize holiday styles from constants (based on primary holiday)
-  const holidayStyles = useMemo(() => {
-    return primaryHoliday ? HOLIDAY_STYLES[primaryHoliday.type] : "";
-  }, [primaryHoliday]);
-
-  // Memoize holiday indicator JSX (based on primary holiday)
-  const holidayIndicator = useMemo(() => {
-    if (!primaryHoliday) return null;
-    return <div className={HOLIDAY_INDICATORS[primaryHoliday.type]} />;
-  }, [primaryHoliday]);
-
-  // Memoize cell styles to avoid Tailwind IntelliSense conflicts
-  const cellStyles = useMemo(() => {
-    const baseStyles = "relative aspect-square flex flex-col items-center justify-center border-r last:border-r-0 border-slate-200/40 dark:border-slate-700/40 transition-[shadow,filter] duration-200";
-    const borderBottom = !isLast ? "border-b" : "";
-
-    // Пріоритет стилів: свято + поточна дата > тільки свято > тільки поточна дата > вихідний > звичайний
-    if (isHoliday && isToday) {
-      // Комбінуємо стилі свята з рамкою поточної дати
-      return cn(
-        baseStyles,
-        borderBottom,
-        holidayStyles,
-        "ring-2 ring-inset ring-slate-500 dark:ring-slate-400 font-bold shadow-sm shadow-slate-400/20 dark:shadow-slate-600/30 hover:brightness-95 dark:hover:brightness-110"
-      );
-    }
-
-    if (isHoliday) {
-      return cn(baseStyles, borderBottom, holidayStyles, "hover:brightness-95 dark:hover:brightness-110");
-    }
-
-    if (isToday) {
-      return cn(
-        baseStyles,
-        borderBottom,
-        "ring-2 ring-inset ring-slate-500 dark:ring-slate-400 bg-linear-to-br from-slate-100 to-slate-50 dark:from-slate-800/70 dark:to-slate-900/50 font-bold shadow-sm shadow-slate-400/20 dark:shadow-slate-600/30"
-      );
-    }
-
-    if (day.isWeekend) {
-      return cn(
-        baseStyles,
-        borderBottom,
-        "bg-linear-to-br from-red-50/50 to-red-50/30 dark:from-red-950/15 dark:to-red-950/5 hover:from-red-50/70 hover:to-red-50/50 dark:hover:from-red-950/25 dark:hover:to-red-950/15"
-      );
-    }
-
-    return cn(baseStyles, borderBottom, "hover:bg-slate-50/60 dark:hover:bg-slate-800/30");
-  }, [isToday, isHoliday, holidayStyles, day.isWeekend, isLast]);
-
-  // Handle click/touch to toggle tooltip on mobile devices
-  const handleCellClick = () => {
-    if (isHoliday) {
-      setTooltipOpen((prev) => !prev);
-    }
-  };
-
-  // Handle Escape key to close tooltip
-  useEffect(() => {
-    if (!tooltipOpen) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setTooltipOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [tooltipOpen]);
-
-  // Показуємо "фантомні" дні з інших місяців
-  if (!day.isCurrentMonth) {
-    const monthNameLocale = locale === "en" ? "en-US" : "uk";
-    return (
-      <div
-        role="gridcell"
-        aria-label={`${day.day} ${day.date.toLocaleDateString(monthNameLocale, { month: 'long' })}`}
-        className={cn(
-          "relative aspect-square flex flex-col items-center justify-center border-r last:border-r-0 border-slate-200/40 dark:border-slate-700/40",
-          // У ISO режимі - сірі цифри, у GFK - звичайні
-          mode === "iso" ? "text-muted-foreground/50" : "",
-          "text-[10px] sm:text-xs",
-          // У GFK режимі цифри також жирнуваті
-          mode === "gfk" && "font-semibold",
-          !isLast && "border-b"
-        )}
-      >
-        <span>{day.day}</span>
-      </div>
-    );
-  }
-
-  const monthNameLocale = locale === "en" ? "en-US" : "uk";
-  const monthName = day.date.toLocaleDateString(monthNameLocale, { month: 'long' });
-  const ariaLabel = isHoliday
-    ? `${day.day} ${monthName}, ${holidays.map(h => getHolidayName(h, locale)).join(', ')}`
-    : `${day.day} ${monthName}${isToday ? t.aria.todaySuffix : ''}`;
-
-  const cellContent = (
+export const DayCell = memo(function DayCell({
+  day,
+  mode,
+  isLast,
+  today,
+  locale,
+  todaySuffix,
+  tabIndex,
+}: Props) {
+  const [open, setOpen] = useState(false);
+  const active = mode === "gfk" || day.isCurrentMonth;
+  const holidays = active ? getHolidaysForDate(day.date) : [];
+  const primary = holidays[0];
+  const isToday = active && day.date === today;
+  const label =
+    formatCalendarDate(day.date, locale, "full") +
+    (holidays.length
+      ? ", " + holidays.map((h) => getHolidayName(h, locale)).join(", ")
+      : "") +
+    (isToday ? todaySuffix : "");
+  const cell = (
     <div
-      className={cn(cellStyles, isHoliday && "cursor-pointer")}
       role="gridcell"
-      aria-label={ariaLabel}
-      aria-describedby={isHoliday && tooltipOpen ? `tooltip-${day.date.toISOString()}` : undefined}
-      tabIndex={day.isCurrentMonth ? 0 : -1}
-      onClick={handleCellClick}
+      data-calendar-date={active ? day.date : undefined}
+      aria-label={label}
+      aria-current={isToday ? "date" : undefined}
+      tabIndex={active ? tabIndex : -1}
+      className={cn(
+        "relative aspect-square flex items-center justify-center border-r last:border-r-0 border-slate-200/40 dark:border-slate-700/40 text-[10px] sm:text-xs",
+        !isLast && "border-b",
+        active ? "font-semibold" : "text-muted-foreground/60",
+        active &&
+          "focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary",
+        primary
+          ? HOLIDAY_STYLES[primary.type]
+          : active && day.isWeekend
+            ? "bg-red-50/50 dark:bg-red-950/15"
+            : "",
+        isToday &&
+          "ring-2 ring-inset ring-slate-500 dark:ring-slate-400 font-bold",
+        primary &&
+          "cursor-pointer hover:brightness-95 dark:hover:brightness-110",
+      )}
+      onClick={(event) => {
+        if (primary) {
+          event.preventDefault();
+          setOpen(true);
+        }
+      }}
+      onKeyDown={(event) => {
+        if (primary && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          setOpen(true);
+        }
+        if (event.key === "Escape") setOpen(false);
+      }}
     >
-      <span
-        className={cn(
-          "text-[10px] sm:text-xs font-semibold transition-colors",
-          isHoliday && "font-bold"
-        )}
-      >
-        {day.day}
-      </span>
-      {isHoliday && holidayIndicator}
+      <span>{day.day}</span>
+      {primary && <div className={HOLIDAY_INDICATORS[primary.type]} />}
     </div>
   );
-
-  if (isHoliday) {
-    return (
-      <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
-        <TooltipTrigger asChild>
-          {cellContent}
-        </TooltipTrigger>
-        <TooltipContent
-          side="top"
-          sideOffset={4}
-          className="px-2.5 py-1.5 text-xs max-w-[calc(100vw-2rem)] sm:max-w-xs"
-        >
-          {holidays.length === 1 ? (
-            <p>{getHolidayName(holidays[0], locale)}</p>
-          ) : (
-            <ul className="space-y-0.5 list-none">
-              {holidays.map((holiday, index) => (
-                <li key={index}>{getHolidayName(holiday, locale)}</li>
-              ))}
-            </ul>
-          )}
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
-
-  return cellContent;
-};
-
-// Memoize component to prevent unnecessary re-renders
-// Only re-render if day, isLast, or mode props change
-export const DayCell = memo(DayCellComponent);
+  return primary ? (
+    <Tooltip open={open} onOpenChange={setOpen}>
+      <TooltipTrigger asChild>{cell}</TooltipTrigger>
+      <TooltipContent
+        side="top"
+        sideOffset={4}
+        className="px-2.5 py-1.5 text-xs max-w-[calc(100vw-2rem)] sm:max-w-xs"
+      >
+        {holidays.map((h) => (
+          <p key={h.type + h.name}>{getHolidayName(h, locale)}</p>
+        ))}
+      </TooltipContent>
+    </Tooltip>
+  ) : (
+    cell
+  );
+});
